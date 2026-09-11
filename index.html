@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Dewey Book</title>
+<style>
+:root{
+  --desk:#39402F;
+  --desk-2:#2F3527;
+  --card:#E4E2D3;
+  --card-2:#D8D6C5;
+  --ink:#191B15;
+  --ink-soft:#5A5C4E;
+  --rule:#B9B7A4;
+  --stamp:#9E2B25;
+  --pencil:#31536B;
+  --ochre:#9A6F17;
+  --green:#41643F;
+  --gap:1.5rem;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--desk);
+  background-image:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 2px,transparent 2px 7px),
+    radial-gradient(circle at 20% 0%,rgba(255,255,255,.05),transparent 60%);
+  color:var(--ink);
+  font-family:"Courier New",Courier,ui-monospace,monospace;
+  font-size:15px;
+  line-height:1.45;
+  padding:1.25rem;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.shell{max-width:1240px;margin:0 auto}
+.masthead{
+  background:var(--card);
+  border:1px solid #000;
+  box-shadow:6px 6px 0 rgba(0,0,0,.32);
+  padding:1.1rem 1.25rem .9rem;
+  display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;justify-content:space-between;
+}
+.stamp{
+  border:3px double var(--stamp);
+  color:var(--stamp);
+  padding:.4rem .85rem .3rem;
+  transform:rotate(-1.4deg);
+  font-family:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  font-weight:800;
+  font-size:clamp(1.5rem,4.2vw,2.45rem);
+  letter-spacing:.09em;
+  line-height:1;
+  mix-blend-mode:multiply;
+  opacity:.92;
+}
+.masthead p{margin:.15rem 0 0;max-width:46ch;color:var(--ink-soft);font-size:.82rem}
+.catalog{text-align:right;font-size:.78rem;color:var(--ink-soft);line-height:1.7}
+.catalog b{color:var(--ink);font-weight:700}
+
+.layout{display:grid;grid-template-columns:310px minmax(0,1fr);gap:var(--gap);margin-top:var(--gap)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+.panel{
+  background:var(--card);
+  border:1px solid #000;
+  box-shadow:6px 6px 0 rgba(0,0,0,.32);
+}
+.panel-head{
+  border-bottom:1px solid var(--rule);
+  padding:.55rem .85rem;
+  font-weight:700;
+  font-size:.82rem;
+  letter-spacing:.02em;
+  display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+}
+.panel-body{padding:.85rem}
+.rail{position:sticky;top:1rem}
+@media(max-width:900px){.rail{position:static}}
+
+/* ---------- slip controls ---------- */
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:.74rem;color:var(--ink-soft);margin-bottom:.25rem}
+.row{display:flex;gap:.4rem}
+.row>*{flex:1;min-width:0}
+input[type=text],input[type=number],select,textarea{
+  width:100%;background:#EFEDE0;border:1px solid var(--rule);border-radius:0;padding:.35rem .45rem;
+}
+textarea{min-height:130px;resize:vertical;line-height:1.5}
+.btn{
+  background:var(--card-2);border:1px solid #000;padding:.45rem .6rem;cursor:pointer;
+  box-shadow:2px 2px 0 rgba(0,0,0,.45);text-align:center;width:100%;
+}
+.btn:hover{background:#E9E7D8}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn-primary{background:var(--stamp);color:#F2EFE2;border-color:#5E1512;font-weight:700}
+.btn-primary:hover{background:#B33029}
+.btn-row{display:flex;gap:.45rem;margin-top:.5rem}
+
+.checks{border-top:1px solid var(--rule);margin-top:.4rem;padding-top:.5rem}
+.chk{display:flex;gap:.55rem;align-items:flex-start;padding:.28rem .15rem;cursor:pointer}
+.chk:hover{background:#EDEBDD}
+.chk input{position:absolute;opacity:0;width:1px;height:1px}
+.box{
+  flex:0 0 auto;width:1.05rem;height:1.05rem;border:1.5px solid var(--ink);margin-top:.12rem;
+  display:grid;place-items:center;font-weight:700;color:transparent;line-height:1;font-size:.95rem;
+}
+.chk input:checked+.box{color:var(--stamp)}
+.chk input:focus-visible+.box{outline:2px solid var(--stamp);outline-offset:2px}
+.chk .lbl{font-size:.86rem}
+.chk .sub{display:block;font-size:.72rem;color:var(--ink-soft);line-height:1.35}
+.chk.master{border-top:1px dashed var(--rule);margin-top:.35rem;padding-top:.45rem}
+
+.dial{display:flex;border:1px solid var(--ink)}
+.dial button{flex:1;background:#EFEDE0;border:0;border-right:1px solid var(--rule);padding:.35rem .2rem;cursor:pointer;font-size:.78rem}
+.dial button:last-child{border-right:0}
+.dial button[aria-pressed=true]{background:var(--ink);color:var(--card)}
+
+.status{font-size:.75rem;color:var(--ink-soft);margin-top:.5rem;min-height:1.2em}
+.status.err{color:var(--stamp)}
+.hidden{display:none !important}
+
+/* ---------- chart ---------- */
+.sheet{padding:1rem .9rem 1.2rem;background:
+  linear-gradient(to right,transparent 0 calc(2.1rem - 1px),rgba(158,43,37,.35) calc(2.1rem - 1px) 2.1rem,transparent 2.1rem);
+}
+.sheet-title{font-size:1.05rem;font-weight:700;margin:0 0 .1rem 2.4rem}
+.sheet-meta{margin:0 0 .9rem 2.4rem;font-size:.78rem;color:var(--ink-soft)}
+.bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin-left:2.4rem}
+@media(max-width:1100px){.bars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.bars{grid-template-columns:1fr;margin-left:1.6rem}}
+.bar{
+  position:relative;border:1px solid var(--rule);border-left:2px solid var(--ink);
+  background:#EBE9DC;padding:.3rem .4rem .15rem;cursor:pointer;text-align:left;width:100%;font:inherit;
+}
+.bar:hover{background:#F3F1E4}
+.bar.changed{border-color:var(--stamp)}
+.bar.playing{background:#FBF3C9;border-color:var(--ochre)}
+.bar.locked{background:#E1E4D9}
+.bar-no{position:absolute;top:.15rem;right:.3rem;font-size:.62rem;color:var(--ink-soft)}
+.lock{position:absolute;top:.1rem;left:.25rem;font-size:.68rem;color:var(--pencil);background:none;border:0;cursor:pointer;padding:.1rem}
+.chords{display:flex;gap:.45rem;flex-wrap:wrap;min-height:1.5rem;align-items:baseline;padding-left:.9rem}
+.chord{font-weight:700;font-size:1rem}
+.chord sub{font-size:.6rem;color:var(--ink-soft);font-weight:400}
+.was{color:var(--pencil);text-decoration:line-through;font-size:.78rem;font-weight:400;padding-left:.9rem}
+.rn{font-size:.66rem;color:var(--ochre);padding-left:.9rem;letter-spacing:.02em}
+.staff{display:block;width:100%;height:52px}
+
+/* ---------- notes drawer ---------- */
+.why{margin-top:var(--gap)}
+.why-body{padding:.85rem;max-height:340px;overflow:auto}
+.why h4{margin:0 0 .2rem;font-size:.9rem}
+.why p{margin:.15rem 0 .8rem;font-size:.84rem;max-width:74ch}
+.tag{display:inline-block;border:1px solid var(--ink);padding:0 .3rem;font-size:.68rem;margin-right:.35rem;background:#EFEDE0}
+.tag.dia{border-color:var(--green);color:var(--green)}
+.tag.chr{border-color:var(--pencil);color:var(--pencil)}
+.tag.iiv{border-color:var(--ochre);color:var(--ochre)}
+.tag.lin{border-color:#6B4E71;color:#6B4E71}
+.tag.jaz{border-color:var(--stamp);color:var(--stamp)}
+.empty{color:var(--ink-soft);font-size:.84rem}
+
+/* ---------- engraved score ---------- */
+.score{background:#FBFAF4;border:1px solid var(--rule);padding:1rem .6rem;margin-left:2.4rem}
+.score .page{margin-bottom:1rem;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.score .page svg{display:block;width:100%;height:auto}
+.score .system{display:block;width:100%;height:auto;margin-bottom:.2rem}
+.score-head{text-align:center;margin:0 0 .6rem}
+.score-head h3{margin:0;font-size:1.15rem;font-weight:700;letter-spacing:.01em}
+.score-head span{font-size:.76rem;color:var(--ink-soft)}
+.foot{border-top:1px solid var(--rule);margin-top:.8rem;padding-top:.5rem;font-size:.72rem;color:var(--ink-soft);line-height:1.5}
+.foot b{color:var(--ink)}
+.viewtog{display:inline-flex;border:1px solid var(--ink)}
+.viewtog button{background:#EFEDE0;border:0;border-right:1px solid var(--rule);padding:.15rem .5rem;cursor:pointer;font-size:.72rem}
+.viewtog button:last-child{border-right:0}
+.viewtog button[aria-pressed=true]{background:var(--ink);color:var(--card)}
+
+#printWrap{display:none}
+@media print{
+  body{background:#fff;padding:0}
+  .shell{display:none !important}
+  #printWrap{display:block;padding:0}
+  #printWrap .score{background:#fff;border:0;margin:0;padding:0}
+  @page{size:letter portrait;margin:.7in}
+}
+
+/* ---------- transport ---------- */
+.transport{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem .85rem;border-top:1px solid var(--rule)}
+.transport .btn{width:auto;flex:0 0 auto}
+.transport label{font-size:.74rem;color:var(--ink-soft)}
+.transport select,.transport input[type=number]{width:auto}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="masthead">
+    <div>
+      <div class="stamp">THE DEWEY BOOK</div>
+      <p>Upload a lead sheet. Choose which substitutions you'll allow. Each pass reharmonizes the chart against the melody and tells you why.</p>
+    </div>
+    <div class="catalog">
+      catalog no. <b id="catNo">781.2</b><br>
+      pass <b id="passNo">0</b> &nbsp;·&nbsp; bars <b id="barCount">0</b><br>
+      changed this pass <b id="changeCount">0</b>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ============ LEFT RAIL ============ -->
+    <div>
+    <section class="panel rail">
+      <div class="panel-head"><span>Call slip</span><span id="srcBadge" style="font-weight:400;color:var(--ink-soft);font-size:.72rem">no chart</span></div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label for="pdf">Lead sheet — MusicXML is exact; PDF or photo gets transcribed</label>
+          <input type="file" id="pdf" accept=".musicxml,.xml,.mxl,application/pdf,image/png,image/jpeg,image/webp" style="font-size:.76rem">
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="readBtn" disabled>Read the chart</button>
+          <button class="btn" id="exampleBtn">Load example</button>
+        </div>
+        <div class="status" id="status"></div>
+
+        <div class="field" style="margin-top:.9rem">
+          <label for="manual">Or type it in — one bar per line: <code>Cmaj7 | E G</code></label>
+          <textarea id="manual" spellcheck="false" placeholder="KEY: C major&#10;METER: 4/4&#10;Cmaj7 | E G&#10;A-7 | C B A&#10;D-7 G7 | F E&#10;Cmaj7 | C"></textarea>
+          <p style="font-size:.72rem;color:var(--ink-soft);margin:.35rem 0 0;line-height:1.4">Uploading fills this in for you — edit it when the reader misses a chord. Typing from scratch: chords before the bar line, melody after. Bare letters are enough (<b>E G A C</b> splits the bar evenly), and you only need <b>E4=2</b> form when you want the staff and playback to be exact. Melody can be left off entirely, but then nothing stops a substitution from clashing with the tune.</p>
+          <button class="btn" id="parseBtn" style="margin-top:.4rem">Use this chart</button>
+        </div>
+
+        <div class="field row" style="gap:.5rem">
+          <div><label for="keySel">Key</label>
+            <select id="keySel"></select></div>
+          <div><label for="modeSel">Mode</label>
+            <select id="modeSel"><option value="major">major</option><option value="minor">minor</option></select></div>
+        </div>
+
+        <div class="checks">
+          <div style="font-weight:700;font-size:.8rem;margin-bottom:.25rem">Substitutions allowed</div>
+
+          <label class="chk"><input type="checkbox" id="r_dia" checked><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">Diatonic<span class="sub">Function swaps inside the key — vi for I, ii for IV, viiø for V.</span></span></label>
+
+          <label class="chk"><input type="checkbox" id="r_chr"><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">Chromatic<span class="sub">Secondary dominants and leading-tone chords, borrowed chords, chromatic mediants — V7/x, vii°7/x, iv, ♭VI, ♭II.</span></span></label>
+
+          <label class="chk"><input type="checkbox" id="r_iiv"><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">ii–V<span class="sub">Split a dominant into its ii–7, and set up targets with secondary ii–Vs.</span></span></label>
+
+          <label class="chk"><input type="checkbox" id="r_lin"><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">Chromatic linear<span class="sub">Passing diminisheds, line clichés, approach chords, stepwise bass.</span></span></label>
+
+          <label class="chk"><input type="checkbox" id="r_jaz"><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">Jazz<span class="sub">Tritone subs, backdoor ♭VII7, sus dominants, turnarounds, Coltrane cycle.</span></span></label>
+
+          <label class="chk master"><input type="checkbox" id="r_all"><span class="box" aria-hidden="true">×</span>
+            <span class="lbl">Any and all<span class="sub">Turn everything on and let the engine choose.</span></span></label>
+        </div>
+
+        <div class="field" style="margin-top:.8rem">
+          <label for="aggro">How far to push</label>
+          <div class="dial" id="aggro" role="group" aria-label="How far to push">
+            <button type="button" data-v="1" aria-pressed="false">Light</button>
+            <button type="button" data-v="2" aria-pressed="true">Working</button>
+            <button type="button" data-v="3" aria-pressed="false">Reckless</button>
+          </div>
+        </div>
+
+        <label class="chk"><input type="checkbox" id="protect" checked><span class="box" aria-hidden="true">×</span>
+          <span class="lbl">Protect the melody<span class="sub">Reject any chord that turns a long or downbeat melody note into an avoid note.</span></span></label>
+
+        <div class="btn-row" style="margin-top:.7rem">
+          <button class="btn btn-primary" id="reharmBtn" disabled>Reharmonize</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="undoBtn" disabled>Undo pass</button>
+          <button class="btn" id="revertBtn" disabled>Back to original</button>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <!-- ============ CHART ============ -->
+    <div>
+      <section class="panel">
+        <div class="panel-head">
+          <span>The chart</span>
+          <span class="viewtog" id="viewtog" role="group" aria-label="View">
+            <button type="button" data-view="bars" aria-pressed="true">Working grid</button>
+            <button type="button" data-view="score" aria-pressed="false">Lead sheet</button>
+          </span>
+        </div>
+        <div class="sheet" id="sheet">
+          <h2 class="sheet-title" id="sheetTitle">Nothing loaded</h2>
+          <p class="sheet-meta" id="sheetMeta">Upload a lead sheet, type one in, or load the example to get started.</p>
+          <div class="bars" id="bars"></div>
+          <div class="score hidden" id="score"></div>
+        </div>
+        <div class="transport">
+          <button class="btn" id="playBtn" disabled>Play</button>
+          <label for="tempo">Tempo</label><input type="number" id="tempo" value="120" min="40" max="260" step="2" style="width:4.5rem">
+          <label for="comp">Feel</label>
+          <select id="comp">
+            <option value="swing">Swing comp</option>
+            <option value="charleston">Charleston</option>
+            <option value="block">Straight blocks</option>
+            <option value="arp">Broken / arpeggiated</option>
+          </select>
+          <label class="chk" style="padding:0"><input type="checkbox" id="withMel" checked><span class="box" aria-hidden="true">×</span><span class="lbl" style="font-size:.76rem">melody</span></label>
+          <label class="chk" style="padding:0"><input type="checkbox" id="showWas" checked><span class="box" aria-hidden="true">×</span><span class="lbl" style="font-size:.76rem">original chords</span></label>
+          <label class="chk" style="padding:0"><input type="checkbox" id="showFoot"><span class="box" aria-hidden="true">×</span><span class="lbl" style="font-size:.76rem">footnotes</span></label>
+          <label for="staffsize">Size</label>
+          <span class="viewtog" id="staffsize" role="group" aria-label="Staff size">
+            <button type="button" data-v="1" aria-pressed="false">S</button>
+            <button type="button" data-v="2" aria-pressed="true">M</button>
+            <button type="button" data-v="3" aria-pressed="false">L</button>
+          </span>
+          <button class="btn btn-primary" id="pdfBtn" disabled>Save as PDF</button>
+          <button class="btn" id="xmlBtn" disabled>MusicXML</button>
+          <button class="btn" id="exportBtn" disabled>Text</button>
+        </div>
+      </section>
+
+      <section class="panel why">
+        <div class="panel-head"><span id="whyHead">Reharmonization notes</span><span style="font-weight:400;font-size:.72rem;color:var(--ink-soft)" id="whyCount"></span></div>
+        <div class="why-body" id="whyBody"><p class="empty">Every substitution the engine makes gets logged here with the rule it used and how the melody sits on the new chord.</p></div>
+      </section>
+    </div>
+
+  </div>
+</div>
+<div id="printWrap"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   THE DEWEY BOOK
+   1. music primitives      5. reharmonization engine
+   2. chord parse/print     6. render
+   3. chart model + parser  7. audio
+   4. PDF extraction (API)  8. wiring
+   ============================================================ */
+
+/* ---------- 0. Verovio engraver (loaded lazily, with fallback) ---------- */
+const VRV_URLS = [
+  "https://www.verovio.org/javascript/latest/verovio-toolkit-wasm.js",
+  "https://cdn.jsdelivr.net/npm/verovio@latest/wasm/verovio-toolkit-wasm.js"
+];
+let VRV = null, vrvState = "idle";
+function loadScript(src){
+  return new Promise((res,rej)=>{
+    const s = document.createElement("script");
+    s.src = src; s.async = true;
+    s.onload = ()=>res(src);
+    s.onerror = ()=>rej(new Error("blocked: "+src));
+    document.head.appendChild(s);
+  });
+}
+async function getVerovio(){
+  if(VRV) return VRV;
+  if(vrvState==="failed") return null;
+  vrvState = "loading";
+  for(const url of VRV_URLS){
+    try{
+      await loadScript(url);
+      await new Promise((res,rej)=>{
+        const t = setTimeout(()=>rej(new Error("timeout")),25000);
+        if(window.verovio && window.verovio.module){
+          window.verovio.module.onRuntimeInitialized = ()=>{ clearTimeout(t); res(); };
+          if(window.verovio.toolkit){ try{ new window.verovio.toolkit(); clearTimeout(t); res(); }catch(e){} }
+        } else rej(new Error("no toolkit"));
+      });
+      VRV = new window.verovio.toolkit();
+      vrvState = "ready";
+      return VRV;
+    }catch(e){ /* try the next source */ }
+  }
+  vrvState = "failed";
+  return null;
+}
+
+/* ---------- 1. music primitives ---------- */
+const LETTERS = ["C","D","E","F","G","A","B"];
+const LETTER_PC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const SHARP = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const FLAT  = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const FLAT_KEYS = new Set(["F","Bb","Eb","Ab","Db","Gb","Cb","D-","G-","C-","F-","Bb-","Eb-"]);
+const mod = (n,m)=>((n%m)+m)%m;
+
+function pcOf(name){
+  if(!name) return null;
+  const m = /^([A-Ga-g])([#b♯♭x]*)/.exec(name.trim());
+  if(!m) return null;
+  let pc = LETTER_PC[m[1].toUpperCase()];
+  for(const ch of m[2]){ if(ch==="#"||ch==="♯") pc++; else if(ch==="b"||ch==="♭") pc--; else if(ch==="x") pc+=2; }
+  return mod(pc,12);
+}
+function spell(pc, flats){ return (flats?FLAT:SHARP)[mod(pc,12)]; }
+
+// diatonic index used for staff placement: letters counted across octaves
+function diatonicIndex(note){
+  const m = /^([A-Ga-g])([#b♯♭]*)(-?\d)$/.exec(note.trim());
+  if(!m) return null;
+  return LETTERS.indexOf(m[1].toUpperCase()) + 7*parseInt(m[3],10);
+}
+function midiOf(note){
+  const m = /^([A-Ga-g])([#b♯♭]*)(-?\d)$/.exec(note.trim());
+  if(!m) return null;
+  let pc = LETTER_PC[m[1].toUpperCase()];
+  for(const ch of m[2]){ if(ch==="#"||ch==="♯") pc++; else if(ch==="b"||ch==="♭") pc--; }
+  return (parseInt(m[3],10)+1)*12 + pc;
+}
+const freqOf = midi => 440*Math.pow(2,(midi-69)/12);
+
+/* ---------- 2. chord parsing & printing ---------- */
+// quality -> chord tones in semitones from root
+const TONES = {
+  maj:[0,4,7,11], maj6:[0,4,7,9], min:[0,3,7,10], min6:[0,3,7,9], minmaj:[0,3,7,11],
+  dom:[0,4,7,10], halfdim:[0,3,6,10], dim:[0,3,6,9], aug:[0,4,8,11], domaug:[0,4,8,10], sus:[0,5,7,10], sus2:[0,2,7,10]
+};
+function parseChord(sym){
+  if(!sym) return null;
+  const s = sym.replace(/\s+/g,"").replace(/[Δ^]/g,"maj7").replace(/ø/g,"m7b5").replace(/[°o]/g,"dim");
+  const m = /^([A-Ga-g][#b♯♭]?)(.*)$/.exec(s);
+  if(!m) return null;
+  const rootPc = pcOf(m[1]);
+  let rest = m[2], bass = null;
+  const slash = rest.split("/");
+  if(slash.length>1 && /^[A-Ga-g][#b♯♭]?$/.test(slash[1])){ rest = slash[0]; bass = pcOf(slash[1]); }
+  let q="maj";
+  const r = rest.toLowerCase();
+  if(/^dim7|^dim/.test(r))                       q = r.startsWith("dim7")||r==="dim"?"dim":"dim";
+  else if(/m7b5|min7b5|-7b5/.test(r))            q = "halfdim";
+  else if(/^(\+|aug)/.test(r))                   q = /7/.test(r)?"domaug":"aug";
+  else if(/^(m|min|-)(?!aj)/.test(r)){
+    if(/maj7|ma7/.test(r)) q="minmaj";
+    else if(/^(m|min|-)6/.test(r)) q="min6";
+    else q="min";
+  }
+  else if(/sus2/.test(r))                        q = "sus2";
+  else if(/sus/.test(r))                         q = "sus";
+  else if(/maj|ma7|M7/.test(rest))               q = "maj";
+  else if(/^6/.test(r))                          q = "maj6";
+  else if(/^(7|9|11|13|alt)/.test(r))            q = "dom";
+  else                                           q = "maj";
+  return {rootPc, q, ext:rest, bass, sym};
+}
+function printChord(rootPc,q,opts){
+  opts = opts||{};
+  const flats = opts.flats!==false;
+  const r = spell(rootPc,flats);
+  const tail = {maj:"maj7",maj6:"6",min:"-7",min6:"-6",minmaj:"-maj7",dom:"7",halfdim:"-7b5",
+                dim:"dim7",aug:"maj7#5",domaug:"7#5",sus:"7sus4",sus2:"9sus"}[q] || "";
+  let s = r + (opts.tail!==undefined?opts.tail:tail);
+  if(opts.bass!=null && opts.bass!==rootPc) s += "/"+spell(opts.bass,flats);
+  return s;
+}
+function chordPcs(ch){ const t = TONES[ch.q]||TONES.maj; return t.map(i=>mod(ch.rootPc+i,12)); }
+
+/* Roman numeral for display */
+const RN_MAJ = {0:"I",1:"bII",2:"II",3:"bIII",4:"III",5:"IV",6:"#IV",7:"V",8:"bVI",9:"VI",10:"bVII",11:"VII"};
+function roman(ch,keyPc){
+  if(!ch) return "";
+  const d = mod(ch.rootPc-keyPc,12);
+  let base = RN_MAJ[d];
+  const lower = ["min","min6","minmaj","halfdim","dim"].includes(ch.q);
+  if(lower) base = base.replace(/[IV]+/,x=>x.toLowerCase());
+  const suffix = {dom:"7",halfdim:"ø7",dim:"°7",maj:"maj7",min:"-7",min6:"-6",minmaj:"-maj7",maj6:"6",aug:"+",domaug:"7+",sus:"7sus",sus2:"9sus"}[ch.q]||"";
+  return base+suffix;
+}
+
+/* ---------- 3. chart model ---------- */
+/* bar = {chords:[{sym,beat}], melody:[{note,beats,start}], lock:false, orig:[...], note:null} */
+let CHART = null;          // {title,keyPc,mode,flats,beats,bars:[]}
+let HISTORY = [];          // snapshots of bars
+let PASS = 0;
+
+function blankChart(){ return {title:"Untitled", keyPc:0, mode:"major", flats:true, beats:4, bars:[]}; }
+
+function parseChartText(text){
+  const ch = blankChart();
+  let keyName = null;
+  const lines = text.split(/\r?\n/);
+  for(const raw of lines){
+    const line = raw.trim();
+    if(!line) continue;
+    let m;
+    if((m=/^TITLE:\s*(.+)$/i.exec(line))){ ch.title=m[1].trim(); continue; }
+    if((m=/^KEY:\s*([A-Ga-g][#b♯♭]?)\s*(major|minor|maj|min)?/i.exec(line))){
+      keyName=m[1]; ch.keyPc=pcOf(m[1]); ch.mode=/min/i.test(m[2]||"")?"minor":"major"; continue;
+    }
+    if((m=/^(?:METER|TIME):\s*(\d+)\s*\/\s*(\d+)/i.exec(line))){ ch.beats=parseInt(m[1],10)||4; continue; }
+    if(/^(END|MORE)$/i.test(line)) continue;
+
+    // strip leading "M12 |" or "12."
+    let body = line.replace(/^M?\s*\d+\s*[.|:]\s*/i,"");
+    const leadingPipe = /^\s*\|/.test(body);
+    let segs = body.replace(/^\s*\|/,"").replace(/\|\s*$/,"").split("|").map(s=>s.trim());
+
+    // "| C | F | G |" or "C | F | G | C" — every segment is its own bar, chords only.
+    // "Cmaj7 | E G" — two segments means chords, then melody.
+    const barsMode = leadingPipe || segs.length>2;
+    const units = barsMode ? segs.map(s=>[s,""]) : [[segs[0]||"", segs[1]||""]];
+
+    for(const [chordPart, melPart] of units){
+      if(!chordPart && !melPart) continue;
+      const bar = {chords:[], melody:[], lock:false, note:null};
+
+      // chords: "Cmaj7" or "D-7@1 G7@3" or "D-7 G7". "%" repeats the previous bar.
+      const ctoks = chordPart.split(/\s+/).filter(Boolean);
+      if(ctoks.length===1 && /^[%]$/.test(ctoks[0]) && ch.bars.length){
+        bar.chords = ch.bars[ch.bars.length-1].chords.map(c=>({...c}));
+      } else ctoks.forEach((t,i)=>{
+        const at = t.split("@");
+        const sym = at[0];
+        if(!sym || sym==="/" || sym==="%") return;
+        let beat = at[1]?parseFloat(at[1]):null;
+        if(beat==null) beat = ctoks.length===1?1:1+i*(ch.beats/ctoks.length);
+        if(parseChord(sym)) bar.chords.push({sym, beat});
+      });
+
+      // melody: "E4=2 G4=1 r=1", or just "E G A C" — octave and duration optional
+      let t = 1;
+      const mtoks = melPart.split(/\s+/).filter(Boolean);
+      const evenly = ch.beats / Math.max(1,mtoks.length);
+      for(const tok of mtoks){
+        const mm = /^([A-Ga-g][#b♯♭]?|[rR])(-?\d)?(?:=([\d.]+))?$/.exec(tok);
+        if(!mm) continue;
+        const beats = mm[3]?parseFloat(mm[3]):evenly;
+        const oct = mm[2]!==undefined?mm[2]:"4";
+        if(!/^[rR]$/.test(mm[1])) bar.melody.push({note:mm[1]+oct, beats, start:t});
+        t += beats;
+      }
+
+      if(!bar.chords.length && !bar.melody.length) continue;
+      bar.orig = bar.chords.map(c=>({...c}));
+      ch.bars.push(bar);
+    }
+  }
+  ch.flats = FLAT_KEYS.has(spell(ch.keyPc,true)) || [1,3,5,8,10].includes(ch.keyPc);
+  if(keyName && /#/.test(keyName)) ch.flats = false;
+  return ch.bars.length?ch:null;
+}
+
+const EXAMPLE = `TITLE: Aura Lee (1861, public domain)
+KEY: F major
+METER: 4/4
+Fmaj7 | A4=2 A4=1 A4=1
+Fmaj7 | Bb4=2 A4=2
+Gm7 | G4=2 G4=1 G4=1
+C7 | A4=2 G4=2
+Fmaj7 | F4=1 A4=1 C5=1 F5=1
+Dm7 | E5=2 D5=2
+Gm7 C7 | C5=2 Bb4=2
+Fmaj7 | A4=4
+Fmaj7 | C5=2 C5=1 C5=1
+F7 | D5=2 C5=2
+Bbmaj7 | Bb4=2 D5=2
+Fmaj7 | C5=2 A4=2
+Dm7 | D5=1 C5=1 Bb4=1 A4=1
+Gm7 | G4=2 Bb4=2
+C7 | A4=2 G4=2
+Fmaj7 | F4=4`;
+
+/* ---------- 3b. MusicXML in and out ---------- */
+const KIND_OF = {maj:"major-seventh",maj6:"major-sixth",min:"minor-seventh",min6:"minor-sixth",
+  minmaj:"major-minor",dom:"dominant",halfdim:"half-diminished",dim:"diminished-seventh",
+  aug:"augmented",domaug:"augmented-seventh",sus:"suspended-fourth",sus2:"suspended-second"};
+const KIND_BACK = {"major-seventh":"maj","major-sixth":"maj6","major":"maj","minor-seventh":"min",
+  "minor-sixth":"min6","minor":"min","major-minor":"minmaj","dominant":"dom","dominant-seventh":"dom",
+  "half-diminished":"halfdim","diminished-seventh":"dim","diminished":"dim","augmented":"aug",
+  "augmented-seventh":"domaug","suspended-fourth":"sus","suspended-second":"sus2"};
+const TYPE_OF = [[4,"whole",0],[3,"half",1],[2,"half",0],[1.5,"quarter",1],[1,"quarter",0],
+  [0.75,"eighth",1],[0.5,"eighth",0],[0.25,"16th",0]];
+function noteType(beats){
+  for(const [b,t,d] of TYPE_OF) if(Math.abs(beats-b)<0.01) return [t,d];
+  return beats>4?["whole",0]:["quarter",0];
+}
+function fifthsOf(keyPc,mode){
+  const sig = keySignature(keyPc,mode);
+  return sig.type==="#" ? sig.n : -sig.n;
+}
+function pitchXML(note){
+  const m = /^([A-Ga-g])([#b♯♭]*)(-?\d)$/.exec(note); if(!m) return "";
+  let alter = 0;
+  for(const c of m[2]){ if(c==="#"||c==="♯") alter++; else alter--; }
+  return `<pitch><step>${m[1].toUpperCase()}</step>${alter?`<alter>${alter}</alter>`:""}<octave>${m[3]}</octave></pitch>`;
+}
+function harmonyXML(sym,flats){
+  const c = parseChord(sym); if(!c) return "";
+  const rn = spell(c.rootPc,flats);
+  const alter = rn.length>1 ? (rn[1]==="#"?1:-1) : 0;
+  const kind = KIND_OF[c.q]||"major";
+  const bass = c.bass!=null && c.bass!==c.rootPc ? (()=> {
+    const b = spell(c.bass,flats); const ba = b.length>1?(b[1]==="#"?1:-1):0;
+    return `<bass><bass-step>${b[0]}</bass-step>${ba?`<bass-alter>${ba}</bass-alter>`:""}</bass>`;
+  })() : "";
+  return `<harmony print-frame="no"><root><root-step>${rn[0]}</root-step>${alter?`<root-alter>${alter}</root-alter>`:""}</root>`
+       + `<kind text="${esc(sym)}">${kind}</kind>${bass}</harmony>`;
+}
+function wordsXML(text,placement,italic,size){
+  return `<direction placement="${placement}"><direction-type><words${italic?' font-style="italic"':""}`
+       + ` font-size="${size||8}">${esc(text)}</words></direction-type></direction>`;
+}
+function chartToMusicXML(chart,ann){
+  ann = ann||{};
+  const D = 8;                       // divisions per quarter note
+  const flats = chart.flats;
+  let footN = 0; const marks = [];
+  let out = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+<work><work-title>${esc(chart.title)}</work-title></work>
+<identification><encoding><software>The Dewey Book</software></encoding></identification>
+<part-list><score-part id="P1"><part-name>Lead</part-name></score-part></part-list>
+<part id="P1">`;
+  chart.bars.forEach((bar,i)=>{
+    out += `<measure number="${i+1}">`;
+    if(i===0){
+      out += `<attributes><divisions>${D}</divisions>`
+           + `<key><fifths>${fifthsOf(chart.keyPc,chart.mode)}</fifths><mode>${chart.mode}</mode></key>`
+           + `<time><beats>${chart.beats}</beats><beat-type>4</beat-type></time>`
+           + `<clef><sign>G</sign><line>2</line></clef></attributes>`;
+    }
+    const was = (bar.orig||[]).map(c=>c.sym).join(" ");
+    const now = bar.chords.map(c=>c.sym).join(" ");
+    if(ann.showWas && was && was!==now) out += wordsXML("("+was+")","below",true,7);
+    if(ann.footnotes && bar.note){ footN++; marks.push({n:footN,note:bar.note});
+      out += wordsXML(String(footN),"above",false,7); }
+    // interleave chord symbols with notes, filling gaps with rests
+    const mel = bar.melody.slice().sort((a,b)=>a.start-b.start);
+    const events = [];
+    let cursor = 1;
+    for(const n of mel){
+      if(n.start-cursor > 0.01) events.push({rest:true,start:cursor,beats:n.start-cursor});
+      events.push({rest:false,start:n.start,beats:n.beats,note:n.note});
+      cursor = n.start+n.beats;
+    }
+    if(chart.beats+1-cursor > 0.01) events.push({rest:true,start:cursor,beats:chart.beats+1-cursor});
+    if(!events.length) events.push({rest:true,start:1,beats:chart.beats});
+
+    const chords = bar.chords.slice().sort((a,b)=>a.beat-b.beat);
+    let ci = 0;
+    for(const ev of events){
+      while(ci<chords.length && chords[ci].beat <= ev.start+0.01){
+        out += harmonyXML(chords[ci].sym,flats); ci++;
+      }
+      const [type,dots] = noteType(ev.beats);
+      out += `<note>${ev.rest?"<rest/>":pitchXML(ev.note)}<duration>${Math.max(1,Math.round(ev.beats*D))}</duration>`
+           + `<voice>1</voice><type>${type}</type>${dots?"<dot/>":""}</note>`;
+    }
+    while(ci<chords.length){ out += harmonyXML(chords[ci].sym,flats); ci++; }
+    if(i===chart.bars.length-1) out += `<barline location="right"><bar-style>light-heavy</bar-style></barline>`;
+    out += `</measure>`;
+  });
+  out += `</part></score-partwise>`;
+  return ann.withMarks ? {xml:out, marks} : out;
+}
+/* a plain notes page appended to the PDF, keyed to the numbers on the score */
+function notesPageSVG(marks,title){
+  const W=2159,H=2794;
+  let g = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" ${SVGNS}><rect width="${W}" height="${H}" fill="#ffffff"/>`;
+  g += `<text x="${W/2}" y="150" text-anchor="middle" font-size="46" font-family="Georgia,serif" fill="#1B1B16">${esc(title)} — what changed</text>`;
+  let y = 240;
+  for(const m of marks){
+    const line = `${m.n}.  ${m.note.from} → ${m.note.to}.  ${m.note.why} ${m.note.melody}`;
+    for(const part of wrapText(line,96)){
+      if(y>H-120) break;
+      g += `<text x="150" y="${y}" font-size="27" font-family="Georgia,serif" fill="#333127">${esc(part)}</text>`;
+      y += 38;
+    }
+    y += 10;
+  }
+  return g+"</svg>";
+}
+function musicXMLToChart(xmlText){
+  const doc = new DOMParser().parseFromString(xmlText,"application/xml");
+  if(doc.querySelector("parsererror")) return null;
+  const part = doc.querySelector("part"); if(!part) return null;
+  const ch = blankChart();
+  const title = doc.querySelector("work-title") || doc.querySelector("movement-title");
+  if(title && title.textContent.trim()) ch.title = title.textContent.trim();
+  let divisions = 1;
+  const STEP = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+
+  part.querySelectorAll("measure").forEach(m=>{
+    const div = m.querySelector("attributes > divisions");
+    if(div) divisions = parseFloat(div.textContent)||divisions;
+    const f = m.querySelector("attributes > key > fifths");
+    if(f){
+      const n = parseInt(f.textContent,10)||0;
+      const modeEl = m.querySelector("attributes > key > mode");
+      ch.mode = modeEl && /minor/i.test(modeEl.textContent) ? "minor" : "major";
+      const majPc = mod(n*7,12);
+      ch.keyPc = ch.mode==="minor" ? mod(majPc-3,12) : majPc;
+      ch.flats = n<0;
+    }
+    const b = m.querySelector("attributes > time > beats");
+    if(b) ch.beats = parseInt(b.textContent,10)||ch.beats;
+
+    const bar = {chords:[], melody:[], lock:false, note:null};
+    let beat = 1;
+    for(const el of m.children){
+      if(el.tagName==="harmony"){
+        const step = (el.querySelector("root-step")||{}).textContent;
+        if(step){
+          const alt = parseInt((el.querySelector("root-alter")||{}).textContent||"0",10);
+          const pc = mod(STEP[step]+alt,12);
+          const kindEl = el.querySelector("kind");
+          const text = kindEl && kindEl.getAttribute("text");
+          const q = KIND_BACK[(kindEl?kindEl.textContent.trim():"major")] || "maj";
+          const off = parseFloat((el.querySelector("offset")||{}).textContent||"0")/divisions;
+          bar.chords.push({sym: text || printChord(pc,q,{flats:ch.flats}), beat: Math.max(1,beat+off)});
+        }
+      } else if(el.tagName==="note"){
+        if(el.querySelector("grace")) continue;
+        const dur = parseFloat((el.querySelector("duration")||{}).textContent||"0")/divisions;
+        const isChordTone = !!el.querySelector("chord");
+        if(isChordTone) continue;                       // lead sheets: keep the top line only
+        const p = el.querySelector("pitch");
+        if(p && !el.querySelector("rest")){
+          const st = p.querySelector("step").textContent;
+          const al = parseInt((p.querySelector("alter")||{}).textContent||"0",10);
+          const oc = p.querySelector("octave").textContent;
+          const name = st + (al>0?"#".repeat(al):"b".repeat(-al)) + oc;
+          bar.melody.push({note:name, beats:dur||1, start:beat});
+        }
+        beat += dur;
+      } else if(el.tagName==="backup"){
+        beat -= parseFloat((el.querySelector("duration")||{}).textContent||"0")/divisions;
+      } else if(el.tagName==="forward"){
+        beat += parseFloat((el.querySelector("duration")||{}).textContent||"0")/divisions;
+      }
+    }
+    if(!bar.chords.length && ch.bars.length){
+      const prev = ch.bars[ch.bars.length-1];
+      bar.chords = prev.chords.map(c=>({...c, beat:1}));  // chord carries across the bar line
+      bar.chords = [bar.chords[bar.chords.length-1]];
+    }
+    bar.orig = bar.chords.map(c=>({...c}));
+    ch.bars.push(bar);
+  });
+  return ch.bars.length?ch:null;
+}
+async function readMXL(file){
+  // .mxl is a zip; pull the first .xml that isn't the container manifest
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const dv = new DataView(buf.buffer);
+  const out = [];
+  for(let i=0;i<buf.length-4;i++){
+    if(dv.getUint32(i,true)!==0x04034b50) continue;
+    const method = dv.getUint16(i+8,true);
+    const compSize = dv.getUint32(i+18,true);
+    const nameLen = dv.getUint16(i+26,true), extraLen = dv.getUint16(i+28,true);
+    const name = new TextDecoder().decode(buf.slice(i+30,i+30+nameLen));
+    const start = i+30+nameLen+extraLen;
+    if(!/\.(xml|musicxml)$/i.test(name) || /^META-INF/i.test(name)) continue;
+    const data = buf.slice(start,start+compSize);
+    if(method===0) out.push(new TextDecoder().decode(data));
+    else if(method===8 && typeof DecompressionStream!=="undefined"){
+      const ds = new DecompressionStream("deflate-raw");
+      const txt = await new Response(new Blob([data]).stream().pipeThrough(ds)).text();
+      out.push(txt);
+    }
+  }
+  const score = out.find(t=>/score-partwise|score-timewise/.test(t));
+  if(!score) throw new Error("That .mxl couldn't be unpacked. Export as uncompressed MusicXML (.musicxml) instead.");
+  return score;
+}
+
+/* ---------- 4. extraction via the Claude API ---------- */
+const EXTRACT_RULES = `You are transcribing a lead sheet into a compact text format. Output ONLY the format below, no commentary, no markdown fences.
+
+TITLE: <song title or "Untitled">
+KEY: <tonic letter with accidental> <major|minor>
+METER: <n>/<d>
+Then one line per measure, in order:
+<chord symbols separated by spaces, each optionally @beat> | <melody notes>
+
+Melody notes are pitch+octave+=beats, e.g. E4=2 means E in the octave starting at middle C, held two beats. Use r=<beats> for rests. Middle C is C4. Every measure's melody durations must add up to the number of beats in the meter. If a measure has no chord symbol printed, repeat the previous measure's chord. Use - for minor (D-7), maj7 for major sevenths, 7 for dominants, dim7 and -7b5 as needed.
+
+Example:
+TITLE: Sample
+KEY: F major
+METER: 4/4
+Fmaj7 | A4=2 C5=2
+D-7 G7@3 | Bb4=2 A4=2
+
+After the last measure you transcribe in this response, output END on its own line if the piece is finished, or MORE if there are further measures.`;
+
+async function callClaude(content){
+  const res = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user",content}] })
+  });
+  if(!res.ok) throw new Error("The reader service returned "+res.status+".");
+  const data = await res.json();
+  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+}
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(String(r.result).split(",")[1]);
+    r.onerror = ()=>rej(new Error("That file could not be read."));
+    r.readAsDataURL(file);
+  });
+}
+async function extractFromFile(file,onProgress){
+  const b64 = await fileToBase64(file);
+  const isPdf = file.type==="application/pdf";
+  const source = isPdf
+    ? {type:"document", source:{type:"base64", media_type:"application/pdf", data:b64}}
+    : {type:"image",    source:{type:"base64", media_type:file.type||"image/png", data:b64}};
+
+  let out = "", startBar = 1, done = false, guard = 0;
+  while(!done && guard++ < 8){
+    onProgress(`Reading from bar ${startBar}…`);
+    const ask = startBar===1
+      ? `${EXTRACT_RULES}\n\nTranscribe this lead sheet. Transcribe at most 16 measures in this response.`
+      : `${EXTRACT_RULES}\n\nContinue the same transcription starting at measure ${startBar}. Skip the TITLE/KEY/METER header this time. At most 16 measures.`;
+    const text = await callClaude([source,{type:"text",text:ask}]);
+    const clean = text.replace(/```[a-z]*|```/g,"").trim();
+    out += (out?"\n":"") + clean.replace(/^\s*(END|MORE)\s*$/gim,"").trim();
+    const bars = out.split(/\r?\n/).filter(l=>l.trim() && !/^(TITLE|KEY|METER|TIME):/i.test(l.trim()));
+    startBar = bars.length + 1;
+    done = /\bEND\b\s*$/i.test(clean.trim()) || !/\bMORE\b\s*$/i.test(clean.trim());
+  }
+  return out;
+}
+
+/* ---------- 5. reharmonization engine ---------- */
+const RULES = {dia:"Diatonic", chr:"Chromatic", iiv:"ii–V", lin:"Chromatic linear", jaz:"Jazz"};
+
+/* melody fit: returns {score, notes:[{note,label,weight}]} — higher is better */
+function beatStrength(b,beats){ if(b===1) return 1; if(beats===4 && b===3) return .8; return Math.abs(b%1)>0?.35:.55; }
+const TENSION_NAME = {1:"♭9",2:"9",3:"♯9",5:"11",6:"♯11",8:"♭13",9:"13",10:"♭7",11:"7",4:"3",7:"5",0:"root"};
+function classify(iv,q){
+  const tones = TONES[q]||TONES.maj;
+  if(tones.includes(iv)) return {v:2,kind:"chord tone"};
+  const ok = {
+    maj:[2,6,9], maj6:[2,6,11], min:[2,5,9], min6:[2,5,11], minmaj:[2,5,9],
+    dom:[1,2,3,6,8,9], halfdim:[2,5,8], dim:[2,5,8,11], aug:[2,6,9], domaug:[1,2,3,6], sus:[2,9,3], sus2:[5,9]
+  }[q]||[];
+  const avoid = {maj:[5,1,8],maj6:[5,1],min:[1,11,6],min6:[1,10],minmaj:[1,6],dom:[5,11],halfdim:[1,4],dim:[1,4],aug:[5,7],domaug:[5,7,11],sus:[4,1],sus2:[4]}[q]||[];
+  if(ok.includes(iv)) return {v:1,kind:"tension "+(TENSION_NAME[iv]||iv)};
+  if(avoid.includes(iv)) return {v:-3,kind:"avoid note ("+(TENSION_NAME[iv]||iv)+")"};
+  return {v:-2,kind:"outside the chord"};
+}
+function melodyFit(bar,chordSym,beats,fromBeat,toBeat){
+  const ch = parseChord(chordSym); if(!ch) return {score:0,notes:[]};
+  const notes=[]; let num=0, den=0;
+  for(const n of bar.melody){
+    const end = n.start + n.beats;
+    if(end<=fromBeat || n.start>=toBeat) continue;
+    const overlap = Math.min(end,toBeat)-Math.max(n.start,fromBeat);
+    const iv = mod(pcOf(n.note)-ch.rootPc,12);
+    const c = classify(iv,ch.q);
+    const w = overlap*beatStrength(n.start,beats);
+    num += w*c.v; den += w;
+    notes.push({note:n.note,label:c.kind,weight:w,iv});
+  }
+  return {score: den? num/den : 1, notes};
+}
+function spans(bar,beats){
+  const cs = bar.chords.length?bar.chords:[{sym:"",beat:1}];
+  return cs.map((c,i)=>({from:c.beat, to:i+1<cs.length?cs[i+1].beat:beats+1, idx:i, chord:c}));
+}
+
+/* --- candidate generators. each returns [{chords:[{sym,beat}], rule, why}] --- */
+function diatonicTable(keyPc,mode){
+  return mode==="major"
+    ? [[0,"maj"],[2,"min"],[4,"min"],[5,"maj"],[7,"dom"],[9,"min"],[11,"halfdim"]].map(([s,q])=>({pc:mod(keyPc+s,12),q,deg:s}))
+    : [[0,"min"],[2,"halfdim"],[3,"maj"],[5,"min"],[7,"dom"],[8,"maj"],[10,"dom"]].map(([s,q])=>({pc:mod(keyPc+s,12),q,deg:s}));
+}
+const FUNCTION_OF = (deg,mode)=> mode==="major"
+  ? ({0:"tonic",4:"tonic",9:"tonic",2:"subdominant",5:"subdominant",7:"dominant",11:"dominant"})[deg]||null
+  : ({0:"tonic",3:"tonic",8:"subdominant",2:"subdominant",5:"subdominant",7:"dominant",10:"dominant"})[deg]||null;
+
+function genDiatonic(ctx){
+  const {ch,keyPc,mode,flats} = ctx; const out=[];
+  const deg = mod(ch.rootPc-keyPc,12);
+  const fn = FUNCTION_OF(deg,mode); if(!fn) return out;
+  for(const d of diatonicTable(keyPc,mode)){
+    if(d.pc===ch.rootPc) continue;
+    if(FUNCTION_OF(d.deg,mode)!==fn) continue;
+    const common = chordPcs(ch).filter(p=>chordPcs({rootPc:d.pc,q:d.q}).includes(p)).length;
+    if(common<2) continue;
+    const sym = printChord(d.pc,d.q,{flats});
+    out.push({chords:[{sym,beat:ch._beat}], rule:"dia",
+      why:`${roman({rootPc:d.pc,q:d.q},keyPc)} for ${roman(ch,keyPc)} — same ${fn} function, ${common} common tones.`});
+  }
+  return out;
+}
+function genChromatic(ctx){
+  const {ch,keyPc,mode,flats,next,span} = ctx; const out=[]; const deg = mod(ch.rootPc-keyPc,12);
+  const push=(pc,q,why)=>out.push({chords:[{sym:printChord(pc,q,{flats}),beat:ch._beat}],rule:"chr",why});
+  // modal interchange from the parallel minor
+  if(mode==="major"){
+    if(deg===5 && ["maj","maj6","dom"].includes(ch.q)) push(ch.rootPc,"min","iv borrowed from F minor's parallel — the ♭6 in the bass line pulls to the third of I.");
+    if(deg===0) { push(mod(keyPc+8,12),"maj","♭VI borrowed from the parallel minor under a tonic melody."); push(mod(keyPc+10,12),"maj","♭VII borrowed — modal, unresolved, keeps the tonic note floating."); }
+    if(deg===2) push(ch.rootPc,"halfdim","iiø7 for ii-7 — minor-mode colour without changing the root.");
+    if(deg===7) push(mod(keyPc+1,12),"maj","Neapolitan ♭II for the dominant — half-step approach into the tonic.");
+    if(deg===9) push(mod(keyPc+8,12),"maj","♭VI for vi — same ♭6 region, brighter major quality.");
+  }else{
+    if(deg===0) push(mod(keyPc+8,12),"maj","♭VI for i — shares the third and fifth, moves the floor down.");
+    if(deg===7) push(mod(keyPc+1,12),"maj","Neapolitan ♭II into the dominant.");
+  }
+  // secondary dominants
+  const room = span && (span.to - span.from >= 2);
+  const mid = span ? span.from + (span.to-span.from)/2 : ch._beat;
+  if(next){
+    const t = parseChord(next.sym);
+    if(t && t.rootPc!==ch.rootPc){
+      const V = mod(t.rootPc+7,12);
+      const LT = mod(t.rootPc-1,12);
+      const targetMinor = ["min","min6","minmaj","halfdim"].includes(t.q);
+      push(V,"dom",`Secondary dominant V7/${roman(t,keyPc)} — tonicizes ${next.sym} in the next bar with its own leading tone.`);
+      push(LT,"dim",`Secondary leading-tone chord vii°7/${roman(t,keyPc)} — built on the half step below ${next.sym}, and identical to V7♭9/${roman(t,keyPc)} without its root, so it pulls the same way with a lighter bass.`);
+      if(!targetMinor) push(LT,"halfdim",`Secondary viiø7/${roman(t,keyPc)} — the half-diminished form, which keeps the note a whole step below ${next.sym} diatonic instead of lowering it.`);
+      if(room) out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(LT,"dim",{flats}),beat:mid}],rule:"chr",
+        why:`${ch.sym} held, then vii°7/${roman(t,keyPc)} on the second half of the bar — a half-step lift into ${next.sym} without giving up the original harmony.`});
+      if(room) out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(V,"dom",{flats}),beat:mid}],rule:"chr",
+        why:`${ch.sym} held, then V7/${roman(t,keyPc)} on the second half of the bar — the original harmony stays, the approach to ${next.sym} gets the leading tone.`});
+      if(ctx.aggro===3){
+        const VV = mod(V+7,12);
+        if(room) out.push({chords:[{sym:printChord(VV,"dom",{flats}),beat:span.from},{sym:printChord(V,"dom",{flats}),beat:mid}],rule:"chr",
+          why:`Extended dominant chain V7/V7/${roman(t,keyPc)} — two dominants in a row, roots falling by fifth into ${next.sym}.`});
+      }
+    }
+  }
+  // turn a diatonic minor chord into its own secondary dominant
+  if(["min","min6","halfdim"].includes(ch.q) && [2,4,9,11].includes(deg)){
+    const target = mod(ch.rootPc+5,12);
+    push(ch.rootPc,"dom",`Quality raised to a dominant — ${printChord(ch.rootPc,"dom",{flats})} becomes V7/${RN_MAJ[mod(target-keyPc,12)]}, borrowing a major third from outside the key.`);
+  }
+  // chromatic mediants
+  for(const iv of [3,4,8,9]){
+    const pc = mod(ch.rootPc+iv,12);
+    const q = ["maj","maj6","dom"].includes(ch.q)?"maj":"min";
+    const common = chordPcs(ch).filter(p=>chordPcs({rootPc:pc,q}).includes(p)).length;
+    if(common<1) continue;
+    push(pc,q,`Chromatic mediant a ${iv===3||iv===9?"minor":"major"} third ${iv<6?"above":"below"} — one common tone held, the rest moves by step.`);
+  }
+  return out;
+}
+function genIIV(ctx){
+  const {ch,keyPc,flats,beats,next,span} = ctx; const out=[];
+  const room = span.to - span.from >= 2;
+  // split a dominant into its related ii
+  if(ch.q==="dom" && room){
+    const ii = mod(ch.rootPc+7,12);
+    out.push({chords:[{sym:printChord(ii,"min",{flats}),beat:span.from},{sym:ch.sym,beat:span.from+(span.to-span.from)/2}],
+      rule:"iiv", why:`${printChord(ii,"min",{flats})} in front of ${ch.sym} — the related ii-7, same harmonic function, fills the bar with motion.`});
+  }
+  // secondary ii–V aiming at the next bar's chord
+  if(next && room){
+    const t = parseChord(next.sym);
+    if(t){
+      const V = mod(t.rootPc+7,12), ii = mod(t.rootPc+2,12);
+      const minorTarget = ["min","min6","minmaj","halfdim"].includes(t.q);
+      const iiQ = minorTarget?"halfdim":"min";
+      out.push({chords:[{sym:printChord(ii,iiQ,{flats}),beat:span.from},{sym:printChord(V,"dom",{flats}),beat:span.from+(span.to-span.from)/2}],
+        rule:"iiv", why:`Secondary ii–V pointed at ${next.sym} in the next bar — ${printChord(ii,iiQ,{flats})} ${printChord(V,"dom",{flats})} makes the arrival sound inevitable.`});
+      out.push({chords:[{sym:printChord(V,"dom",{flats}),beat:span.from}],rule:"iiv",
+        why:`Secondary dominant V7/${roman(t,keyPc)} — leading-tone pull into ${next.sym}.`});
+    }
+  }
+  return out;
+}
+function genLinear(ctx){
+  const {ch,keyPc,flats,next,span,beats,prev} = ctx; const out=[];
+  const room = span.to - span.from >= 2;
+  const mid = span.from + (span.to-span.from)/2;
+  if(next){
+    const t = parseChord(next.sym);
+    if(t){
+      const dist = mod(t.rootPc-ch.rootPc,12);
+      if(dist===2 && room) out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(mod(ch.rootPc+1,12),"dim",{flats}),beat:mid}],
+        rule:"lin", why:`Ascending passing diminished ${printChord(mod(ch.rootPc+1,12),"dim",{flats})} walks the bass ${spell(ch.rootPc,flats)}–${spell(mod(ch.rootPc+1,12),flats)}–${spell(t.rootPc,flats)}.`});
+      if(dist===10 && room) out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(mod(ch.rootPc-1,12),"dim",{flats}),beat:mid}],
+        rule:"lin", why:`Descending passing diminished connects ${spell(ch.rootPc,flats)} down to ${spell(t.rootPc,flats)} by half step.`});
+      if(room) out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(mod(t.rootPc+1,12),t.q==="min"?"min":"dom",{flats}),beat:mid}],
+        rule:"lin", why:`Half-step approach chord above ${next.sym} — everything slides down a semitone into the next bar.`});
+      // stepwise bass by inversion
+      const third = mod(ch.rootPc+(["min","min6","minmaj","halfdim","dim"].includes(ch.q)?3:4),12);
+      if(mod(t.rootPc-third,12)===1||mod(third-t.rootPc,12)===1)
+        out.push({chords:[{sym:printChord(ch.rootPc,ch.q,{flats,bass:third}),beat:span.from}],
+          rule:"lin", why:`Same chord over its third — the bass steps by semitone into ${next.sym} instead of leaping.`});
+    }
+  }
+  // line cliché when the harmony sits still
+  if(next && parseChord(next.sym) && parseChord(next.sym).rootPc===ch.rootPc && room){
+    if(["min","min6","minmaj"].includes(ch.q))
+      out.push({chords:[{sym:printChord(ch.rootPc,"min",{flats,tail:"-"}),beat:span.from},{sym:printChord(ch.rootPc,"minmaj",{flats}),beat:mid}],
+        rule:"lin", why:`Minor line cliché — an inner voice descends root, 7, ♭7, 6 while the chord stays put.`});
+    else
+      out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(ch.rootPc,"aug",{flats}),beat:mid}],
+        rule:"lin", why:`Major line cliché — the fifth rises to ♯5 underneath a static melody.`});
+  }
+  return out;
+}
+function genJazz(ctx){
+  const {ch,keyPc,flats,next,span,mode} = ctx; const out=[];
+  const room = span.to-span.from>=2, mid = span.from+(span.to-span.from)/2;
+  if(ch.q==="dom"){
+    const tri = mod(ch.rootPc+6,12);
+    out.push({chords:[{sym:printChord(tri,"dom",{flats}),beat:span.from}],rule:"jaz",
+      why:`Tritone substitution — ${printChord(tri,"dom",{flats})} holds the same third and seventh as ${ch.sym}, so the bass falls by half step instead of a fifth.`});
+    if(room) out.push({chords:[{sym:printChord(ch.rootPc,"sus",{flats}),beat:span.from},{sym:ch.sym,beat:mid}],rule:"jaz",
+      why:`Suspended dominant resolving to the plain dominant — delays the third, softens the cadence.`});
+    out.push({chords:[{sym:printChord(mod(ch.rootPc+4,12),"dim",{flats}),beat:span.from}],rule:"jaz",
+      why:`Diminished seventh from the third of ${ch.sym} — a rootless V7♭9 with the same pull.`});
+  }
+  if(next){
+    const t = parseChord(next.sym);
+    if(t && mod(t.rootPc-keyPc,12)===0 && ["maj","maj6","min"].includes(t.q)){
+      out.push({chords:[{sym:printChord(mod(keyPc+10,12),"dom",{flats}),beat:span.from}],rule:"jaz",
+        why:`Backdoor ♭VII7 into the tonic — resolves up by whole step, a plagal-feeling arrival.`});
+      if(room) out.push({chords:[{sym:printChord(mod(keyPc+5,12),"min",{flats}),beat:span.from},{sym:printChord(mod(keyPc+10,12),"dom",{flats}),beat:mid}],rule:"jaz",
+        why:`iv-7 ♭VII7 backdoor pair — the standard way into a tonic without the V.`});
+    }
+  }
+  // turnaround on a static tonic bar
+  const deg = mod(ch.rootPc-keyPc,12);
+  if(deg===0 && room){
+    out.push({chords:[{sym:ch.sym,beat:span.from},{sym:printChord(mod(keyPc+9,12),"dom",{flats}),beat:mid}],rule:"jaz",
+      why:`I VI7 turnaround — the VI7 is a secondary dominant aiming at ii.`});
+    out.push({chords:[{sym:printChord(mod(keyPc+4,12),"min",{flats}),beat:span.from},{sym:printChord(mod(keyPc+9,12),"dom",{flats}),beat:mid}],rule:"jaz",
+      why:`iii-7 VI7 for the tonic bar — keeps the tonic sound but starts the turnaround early.`});
+  }
+  // Coltrane cycle, only when pushed hard
+  if(ctx.aggro===3 && ch.q==="dom" && room){
+    const a = mod(ch.rootPc+8,12), b = mod(ch.rootPc+4,12);
+    out.push({chords:[{sym:printChord(a,"dom",{flats}),beat:span.from},{sym:printChord(b,"dom",{flats}),beat:mid}],rule:"jaz",
+      why:`Major-thirds cycle in place of one dominant — Coltrane changes, roots moving by major third.`});
+  }
+  return out;
+}
+const GENERATORS = {dia:genDiatonic, chr:genChromatic, iiv:genIIV, lin:genLinear, jaz:genJazz};
+
+function activeRules(){
+  const all = document.getElementById("r_all").checked;
+  return Object.keys(RULES).filter(k=> all || document.getElementById("r_"+k).checked);
+}
+function currentAggro(){ return parseInt(document.querySelector("#aggro button[aria-pressed=true]").dataset.v,10); }
+
+function reharmonize(){
+  if(!CHART) return;
+  const rules = activeRules();
+  if(!rules.length){ setStatus("Tick at least one substitution family first.",true); return; }
+  const aggro = currentAggro();
+  const protect = document.getElementById("protect").checked;
+  const {keyPc,mode,flats,beats,bars} = CHART;
+  HISTORY.push(JSON.parse(JSON.stringify(bars)));
+  let changed = 0;
+  const chance = {1:.3,2:.55,3:.85}[aggro];
+  const floor  = protect ? {1:1.1,2:.7,3:.25}[aggro] : -1.5;
+
+  bars.forEach((bar,i)=>{
+    if(bar.lock) return;
+    const isLast = i===bars.length-1;
+    if(isLast && aggro<3) return;               // leave the final cadence alone unless pushed
+    if(Math.random()>chance) return;
+    const sp = spans(bar,beats);
+    const pick = sp[Math.floor(Math.random()*sp.length)];
+    const ch = parseChord(pick.chord.sym);
+    if(!ch) return;
+    ch._beat = pick.from;
+    const nextBar = bars[i+1];
+    const ctx = {ch, keyPc, mode, flats, beats, span:pick, aggro,
+                 next: nextBar && nextBar.chords[0] ? nextBar.chords[0] : null,
+                 prev: i>0 && bars[i-1].chords.length ? bars[i-1].chords[bars[i-1].chords.length-1] : null};
+
+    let cands = [];
+    for(const r of rules){ try{ cands = cands.concat(GENERATORS[r](ctx)); }catch(e){} }
+    if(!cands.length) return;
+
+    // score each candidate against the melody in its own time window
+    const scored = cands.map(c=>{
+      let s = 0, det = [];
+      c.chords.forEach((cc,k)=>{
+        const to = k+1<c.chords.length ? c.chords[k+1].beat : pick.to;
+        const fit = melodyFit(bar,cc.sym,beats,cc.beat,to);
+        s += fit.score; det = det.concat(fit.notes.map(n=>({...n,over:cc.sym})));
+      });
+      s /= c.chords.length;
+      // reward smooth root motion into the following bar
+      if(ctx.next){
+        const t = parseChord(ctx.next.sym), lastNew = parseChord(c.chords[c.chords.length-1].sym);
+        if(t&&lastNew){ const d = mod(t.rootPc-lastNew.rootPc,12); if([1,5,7,11].includes(d)) s += .35; }
+      }
+      return {...c, score:s, detail:det};
+    }).filter(c=>c.score>=floor);
+
+    if(!scored.length) return;
+    scored.sort((a,b)=>b.score-a.score);
+    const poolSize = aggro===1?1:Math.min(scored.length, aggro===2?3:5);
+    const chosen = scored[Math.floor(Math.random()*poolSize)];
+    if(chosen.chords.map(c=>c.sym).join(" ") === sp.map(s=>s.chord.sym).join(" ")) return;
+
+    // rebuild the bar's chord list, replacing only this span
+    const before = bar.chords.filter(c=>c.beat<pick.from);
+    const after  = bar.chords.filter(c=>c.beat>=pick.to);
+    bar.chords = before.concat(chosen.chords.map(c=>({...c}))).concat(after).sort((a,b)=>a.beat-b.beat);
+
+    const worst = chosen.detail.filter(d=>d.weight>0).sort((a,b)=>b.weight-a.weight)[0];
+    bar.note = {
+      rule: chosen.rule,
+      from: sp.map(s=>s.chord.sym).join(" "),
+      to: chosen.chords.map(c=>c.sym).join(" "),
+      why: chosen.why,
+      melody: worst ? `Melody ${worst.note} sits on ${worst.over} as a ${worst.label}.` : "No melody note sounds against this chord.",
+      pass: PASS+1
+    };
+    changed++;
+  });
+
+  PASS++;
+  document.getElementById("passNo").textContent = PASS;
+  document.getElementById("changeCount").textContent = changed;
+  render();
+  if(!changed) setStatus("That pass found nothing the melody would allow. Push harder, or allow another family.");
+  else setStatus(`Pass ${PASS}: ${changed} bar${changed>1?"s":""} reharmonized.`);
+}
+
+/* ---------- 6. render ---------- */
+function staffSVG(bar,beats,flats){
+  const W=200,H=52,top=10,gap=6,left=26,right=W-6;
+  const bottomLine = top+gap*4;                 // E4
+  const yFor = idx => bottomLine - (idx-30)*(gap/2);
+  let s = `<svg class="staff" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">`;
+  for(let i=0;i<5;i++) s += `<line x1="2" y1="${top+i*gap}" x2="${W-2}" y2="${top+i*gap}" stroke="#8E8C7C" stroke-width=".7"/>`;
+  s += `<text x="5" y="${bottomLine+1}" font-size="26" fill="#191B15" font-family="serif">𝄞</text>`;
+  for(const n of bar.melody){
+    const idx = diatonicIndex(n.note); if(idx==null) continue;
+    const x = left + ((n.start-1)/beats)*(right-left) + 6;
+    const y = yFor(idx);
+    for(let l=28; l>=idx; l-=2) s += `<line x1="${x-5}" y1="${yFor(l)}" x2="${x+5}" y2="${yFor(l)}" stroke="#8E8C7C" stroke-width=".7"/>`;
+    for(let l=40; l<=idx; l+=2) s += `<line x1="${x-5}" y1="${yFor(l)}" x2="${x+5}" y2="${yFor(l)}" stroke="#8E8C7C" stroke-width=".7"/>`;
+    const open = n.beats>=2;
+    s += `<ellipse cx="${x}" cy="${y}" rx="3.4" ry="2.5" transform="rotate(-18 ${x} ${y})" fill="${open?"none":"#191B15"}" stroke="#191B15" stroke-width="1.1"/>`;
+    if(n.beats<4) s += `<line x1="${x+3.2}" y1="${y-1}" x2="${x+3.2}" y2="${y-13}" stroke="#191B15" stroke-width="1"/>`;
+    const acc = /[#b♯♭]/.test(n.note) ? (/#|♯/.test(n.note)?"♯":"♭") : "";
+    if(acc) s += `<text x="${x-11}" y="${y+3}" font-size="9" fill="#191B15">${acc}</text>`;
+  }
+  return s+"</svg>";
+}
+function render(){
+  const wrap = document.getElementById("bars");
+  if(!CHART){ wrap.innerHTML=""; return; }
+  document.getElementById("sheetTitle").textContent = CHART.title;
+  document.getElementById("sheetMeta").textContent =
+    `${spell(CHART.keyPc,CHART.flats)} ${CHART.mode} · ${CHART.beats}/4 · ${CHART.bars.length} bars`;
+  document.getElementById("barCount").textContent = CHART.bars.length;
+  wrap.innerHTML = CHART.bars.map((bar,i)=>{
+    const nowSyms  = bar.chords.map(c=>c.sym).join(" ");
+    const origSyms = (bar.orig||[]).map(c=>c.sym).join(" ");
+    const changed  = nowSyms!==origSyms;
+    const chords = bar.chords.map(c=>{
+      const p = parseChord(c.sym);
+      return `<span class="chord">${c.sym}${bar.chords.length>1?`<sub>${c.beat}</sub>`:""}</span>`;
+    }).join("");
+    const rns = bar.chords.map(c=>roman(parseChord(c.sym),CHART.keyPc)).join(" ");
+    return `<button class="bar ${changed?"changed":""} ${bar.lock?"locked":""}" data-i="${i}">
+      <span class="lock" data-lock="${i}" title="${bar.lock?"Unfreeze":"Freeze"} this bar">${bar.lock?"▣":"▢"}</span>
+      <span class="bar-no">${i+1}</span>
+      <span class="chords">${chords}</span>
+      ${changed?`<span class="was">was ${origSyms}</span>`:""}
+      ${staffSVG(bar,CHART.beats,CHART.flats)}
+      <span class="rn">${rns}</span>
+    </button>`;
+  }).join("");
+  renderWhy();
+  const has = CHART.bars.length>0;
+  document.getElementById("reharmBtn").disabled = !has;
+  document.getElementById("playBtn").disabled = !has;
+  document.getElementById("exportBtn").disabled = !has;
+  document.getElementById("pdfBtn").disabled = !has;
+  document.getElementById("undoBtn").disabled = !HISTORY.length;
+  document.getElementById("revertBtn").disabled = !HISTORY.length;
+  if(VIEW==="score") buildScore(document.getElementById("score"));
+}
+function renderWhy(filterIdx){
+  const body = document.getElementById("whyBody");
+  const items = CHART.bars.map((b,i)=>({b,i})).filter(x=>x.b.note && (filterIdx==null||x.i===filterIdx));
+  document.getElementById("whyHead").textContent = filterIdx==null?"Reharmonization notes":`Bar ${filterIdx+1}`;
+  document.getElementById("whyCount").textContent = filterIdx==null&&items.length?`${items.length} substitution${items.length>1?"s":""} · click a bar to isolate`:"";
+  if(!items.length){
+    body.innerHTML = `<p class="empty">${filterIdx==null
+      ? "Every substitution the engine makes gets logged here with the rule it used and how the melody sits on the new chord."
+      : "This bar is still the original harmony."}</p>`;
+    return;
+  }
+  body.innerHTML = items.map(({b,i})=>`
+    <h4>Bar ${i+1}: ${b.note.from} → ${b.note.to}</h4>
+    <p><span class="tag ${b.note.rule}">${RULES[b.note.rule]}</span>${b.note.why} ${b.note.melody}</p>`).join("");
+}
+
+/* ---------- 6b. engraved lead sheet ---------- */
+const SHARP_KEYS = {0:0,7:1,2:2,9:3,4:4,11:5,6:6};      // C G D A E B F#
+const FLAT_KEYS_N = {5:1,10:2,3:3,8:4,1:5,6:6};          // F Bb Eb Ab Db Gb
+const SHARP_POS = [38,35,39,36,33,37,34];                // F5 C5 G5 D5 A4 E5 B4
+const FLAT_POS  = [34,37,33,36,32,35,31];                // B4 E5 A4 D5 G4 C5 F4
+function keySignature(keyPc,mode){
+  const majPc = mode==="minor" ? mod(keyPc+3,12) : keyPc;
+  if(SHARP_KEYS[majPc]!==undefined && majPc!==6) return {type:"#",n:SHARP_KEYS[majPc]};
+  if(FLAT_KEYS_N[majPc]!==undefined) return {type:"b",n:FLAT_KEYS_N[majPc]};
+  return {type:"#",n:0};
+}
+function scoreSystems(chart,opts){
+  opts = opts||{};
+  const perSystem = opts.perSystem||4;
+  const W=720, gap=8, staffTop=44, H=104;
+  const yFor = idx => (staffTop+gap*4) - (idx-30)*(gap/2);
+  const sig = keySignature(chart.keyPc,chart.mode);
+  const systems = [];
+  const marks = [];                                   // footnote numbers, in bar order
+  let footN = 0;
+
+  for(let s=0; s<chart.bars.length; s+=perSystem){
+    const group = chart.bars.slice(s,s+perSystem);
+    const first = s===0;
+    const indent = first ? 96 + sig.n*7 : 46 + sig.n*7;
+    const barW = (W-10-indent)/group.length;
+    let g = "";
+    for(let i=0;i<5;i++) g += `<line x1="8" y1="${staffTop+i*gap}" x2="${W-2}" y2="${staffTop+i*gap}" stroke="#1B1B16" stroke-width=".9"/>`;
+    g += `<text x="12" y="${staffTop+gap*4+2}" font-size="38" font-family="serif" fill="#1B1B16">𝄞</text>`;
+    // key signature
+    const pos = sig.type==="#"?SHARP_POS:FLAT_POS;
+    for(let k=0;k<sig.n;k++)
+      g += `<text x="${40+k*7}" y="${yFor(pos[k])+4}" font-size="15" font-family="serif" fill="#1B1B16">${sig.type==="#"?"♯":"♭"}</text>`;
+    if(first){
+      const x = 44+sig.n*7;
+      g += `<text x="${x}" y="${staffTop+gap*1.9}" font-size="17" font-weight="700" font-family="serif" fill="#1B1B16">${chart.beats}</text>`;
+      g += `<text x="${x}" y="${staffTop+gap*3.9}" font-size="17" font-weight="700" font-family="serif" fill="#1B1B16">4</text>`;
+    }
+
+    group.forEach((bar,bi)=>{
+      const x0 = indent + bi*barW;
+      g += `<line x1="${x0+barW}" y1="${staffTop}" x2="${x0+barW}" y2="${staffTop+gap*4}" stroke="#1B1B16" stroke-width="${s+perSystem>=chart.bars.length&&bi===group.length-1?2.4:1}"/>`;
+      g += `<text x="${x0+2}" y="${staffTop-24}" font-size="8" fill="#8A8878">${s+bi+1}</text>`;
+      // chord symbols
+      bar.chords.forEach(c=>{
+        const cx = x0 + ((c.beat-1)/chart.beats)*barW + 3;
+        g += `<text x="${cx}" y="${staffTop-9}" font-size="14" font-weight="700" font-family="Helvetica,Arial,sans-serif" fill="#1B1B16">${esc(c.sym)}</text>`;
+      });
+      // what it used to be
+      const was = (bar.orig||[]).map(c=>c.sym).join(" ");
+      const now = bar.chords.map(c=>c.sym).join(" ");
+      if(opts.showWas && was && was!==now)
+        g += `<text x="${x0+3}" y="${staffTop+gap*4+20}" font-size="10" font-style="italic" fill="#7A7868">(${esc(was)})</text>`;
+      if(opts.footnotes && bar.note){
+        footN++; marks.push({n:footN,bar:s+bi,note:bar.note});
+        g += `<text x="${x0+barW-9}" y="${staffTop-24}" font-size="9" font-weight="700" fill="#9E2B25">${footN}</text>`;
+      }
+      // melody
+      bar.melody.forEach(n=>{
+        const idx = diatonicIndex(n.note); if(idx==null) return;
+        const x = x0 + ((n.start-1)/chart.beats)*barW + 14;
+        const y = yFor(idx);
+        for(let l=28;l>=idx;l-=2) g += `<line x1="${x-6}" y1="${yFor(l)}" x2="${x+6}" y2="${yFor(l)}" stroke="#1B1B16" stroke-width=".9"/>`;
+        for(let l=40;l<=idx;l+=2) g += `<line x1="${x-6}" y1="${yFor(l)}" x2="${x+6}" y2="${yFor(l)}" stroke="#1B1B16" stroke-width=".9"/>`;
+        const open = n.beats>=2;
+        g += `<ellipse cx="${x}" cy="${y}" rx="4.3" ry="3.2" transform="rotate(-18 ${x} ${y})" fill="${open?"#FFF":"#1B1B16"}" stroke="#1B1B16" stroke-width="1.3"/>`;
+        if(n.beats<4){
+          const up = idx<34;
+          const sx = up?x+4:x-4, sy1 = y, sy2 = up?y-20:y+20;
+          g += `<line x1="${sx}" y1="${sy1}" x2="${sx}" y2="${sy2}" stroke="#1B1B16" stroke-width="1.2"/>`;
+          if(n.beats<=0.5) g += `<path d="M${sx} ${sy2} q6 4 5 10" stroke="#1B1B16" stroke-width="1.2" fill="none"/>`;
+        }
+        const acc = /[#♯]/.test(n.note)?"♯":(/[b♭]/.test(n.note)?"♭":"");
+        if(acc) g += `<text x="${x-14}" y="${y+4}" font-size="13" font-family="serif" fill="#1B1B16">${acc}</text>`;
+      });
+    });
+    systems.push(g);
+  }
+  return {systems, marks, W, H};
+}
+const SVGNS = `xmlns="http://www.w3.org/2000/svg"`;
+function wrapSystem(inner,W,H){ return `<svg class="system" viewBox="0 0 ${W} ${H}" ${SVGNS}>${inner}</svg>`; }
+
+/* compose full pages for the PDF: title, systems, footnotes */
+function scorePages(chart,opts){
+  const {systems,marks,W,H} = scoreSystems(chart,opts);
+  const PH = 932, top = 74, perPage = opts.footnotes?6:7;
+  const pages = [];
+  for(let i=0;i<systems.length;i+=perPage){
+    const group = systems.slice(i,i+perPage);
+    let g = `<svg width="${W}" height="${PH}" viewBox="0 0 ${W} ${PH}" ${SVGNS}><rect width="${W}" height="${PH}" fill="#ffffff"/>`;
+    if(i===0){
+      g += `<text x="${W/2}" y="34" text-anchor="middle" font-size="21" font-weight="700" font-family="Georgia,serif" fill="#1B1B16">${esc(chart.title)}</text>`;
+      g += `<text x="${W/2}" y="54" text-anchor="middle" font-size="11" font-family="Georgia,serif" fill="#6A6858">${spell(chart.keyPc,chart.flats)} ${chart.mode} · reharmonized in The Dewey Book${PASS?" · "+PASS+" pass"+(PASS===1?"":"es"):""}</text>`;
+    }
+    group.forEach((s,k)=> g += `<g transform="translate(0,${(i===0?top:30)+k*H})">${s}</g>`);
+    if(opts.footnotes && marks.length && i+perPage>=systems.length){
+      let y = (i===0?top:30) + group.length*H + 24;
+      g += `<line x1="8" y1="${y-14}" x2="${W-8}" y2="${y-14}" stroke="#C9C7B6" stroke-width="1"/>`;
+      for(const m of marks){
+        const line = `${m.n}.  ${m.note.from} → ${m.note.to}. ${m.note.why}`;
+        for(const part of wrapText(line,104)){
+          if(y>PH-12) break;
+          g += `<text x="8" y="${y}" font-size="9.5" font-family="Georgia,serif" fill="#4A483C">${esc(part)}</text>`;
+          y += 13;
+        }
+      }
+    }
+    pages.push(g+"</svg>");
+  }
+  return pages;
+}
+function wrapText(s,n){
+  const words = s.split(" "), out=[]; let line="";
+  for(const w of words){
+    if((line+" "+w).trim().length>n){ out.push(line.trim()); line=w; }
+    else line += " "+w;
+  }
+  if(line.trim()) out.push(line.trim());
+  return out;
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+async function buildScore(target){
+  if(!CHART){ target.innerHTML=""; return; }
+  target.innerHTML = `<p class="empty" style="padding:1rem">Engraving…</p>`;
+  const opts = {showWas:document.getElementById("showWas").checked,
+                footnotes:document.getElementById("showFoot").checked};
+  const v = await verovioPages(CHART,opts);
+  if(v){
+    target.innerHTML = v.pages.map(p=>`<div class="page">${sizeSVG(p,900)}</div>`).join("")
+      + (opts.footnotes && v.marks.length
+         ? `<div class="foot">${v.marks.map(m=>`<div><b>${m.n}.</b> ${esc(m.note.from)} → ${esc(m.note.to)}. ${esc(m.note.why)}</div>`).join("")}</div>` : "");
+    return;
+  }
+  // fallback: the built-in engraver
+  const {systems,marks,W,H} = scoreSystems(CHART,opts);
+  const svg = systems.map(s=>wrapSystem(s,W,H)).join("");
+  const head = `<div class="score-head"><h3>${esc(CHART.title)}</h3>
+    <span>${spell(CHART.keyPc,CHART.flats)} ${CHART.mode} · reharmonized in The Dewey Book${PASS?" · "+PASS+" pass"+(PASS===1?"":"es"):""}</span></div>`;
+  const foot = (opts.footnotes && marks.length)
+    ? `<div class="foot">${marks.map(m=>`<div><b>${m.n}.</b> ${esc(m.note.from)} → ${esc(m.note.to)}. ${esc(m.note.why)}</div>`).join("")}</div>`
+    : "";
+  target.innerHTML = head + svg + foot;
+}
+let VIEW = "bars";
+function setView(v){
+  VIEW = v;
+  document.querySelectorAll("#viewtog button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.view===v)));
+  document.getElementById("bars").classList.toggle("hidden", v!=="bars");
+  document.getElementById("score").classList.toggle("hidden", v!=="score");
+  document.getElementById("sheetTitle").classList.toggle("hidden", v==="score");
+  document.getElementById("sheetMeta").classList.toggle("hidden", v==="score");
+  if(v==="score") buildScore(document.getElementById("score"));
+}
+
+/* ---------- 6d. Verovio rendering ---------- */
+const VRV_SCALE = {1:38,2:48,3:60};
+async function verovioPages(chart,ann){
+  const tk = await getVerovio();
+  if(!tk) return null;
+  const size = parseInt((document.querySelector("#staffsize button[aria-pressed=true]")||{dataset:{v:2}}).dataset.v,10);
+  tk.setOptions({
+    pageWidth:2159, pageHeight:2794,
+    pageMarginLeft:110, pageMarginRight:110, pageMarginTop:110, pageMarginBottom:110,
+    scale:VRV_SCALE[size]||48, adjustPageHeight:false, breaks:"auto",
+    header:"auto", footer:"none", mnumInterval:4, spacingStaff:10, svgViewBox:true
+  });
+  const built = chartToMusicXML(chart,{...(ann||{}), withMarks:true});
+  const ok = tk.loadData(built.xml);
+  if(!ok) return null;
+  const n = tk.getPageCount();
+  const pages = [];
+  for(let i=1;i<=n;i++) pages.push(tk.renderToSVG(i));
+  return pages.length?{pages, marks:built.marks}:null;
+}
+function svgDims(svg){
+  const vb = /viewBox="([\d.\-]+)\s+([\d.\-]+)\s+([\d.\-]+)\s+([\d.\-]+)"/.exec(svg);
+  if(vb) return {w:parseFloat(vb[3]), h:parseFloat(vb[4])};
+  const w = /width="(\d+)/.exec(svg), h = /height="(\d+)/.exec(svg);
+  return {w: w?parseFloat(w[1]):2159, h: h?parseFloat(h[1]):2794};
+}
+function sizeSVG(svg,px){
+  const d = svgDims(svg);
+  return svg.replace(/<svg([^>]*)>/, (m,attrs)=>{
+    const a = attrs.replace(/\s(width|height)="[^"]*"/g,"");
+    return `<svg${a} width="${px}" height="${Math.round(px*d.h/d.w)}">`;
+  });
+}
+
+/* ---------- 6c. PDF output (no library, no print dialog) ---------- */
+function svgToJpeg(svg,pxWidth){
+  return new Promise((resolve,reject)=>{
+    const d = svgDims(svg);
+    const w = pxWidth, h = Math.round(pxWidth*d.h/d.w);
+    const img = new Image();
+    img.onload = ()=>{
+      const c = document.createElement("canvas");
+      c.width=w; c.height=h;
+      const cx = c.getContext("2d");
+      cx.fillStyle="#ffffff"; cx.fillRect(0,0,w,h);
+      cx.drawImage(img,0,0,w,h);
+      try{ resolve({url:c.toDataURL("image/jpeg",0.92), w, h}); }
+      catch(e){ reject(new Error("This browser wouldn't let the sheet be converted to an image.")); }
+    };
+    img.onerror = ()=>reject(new Error("The sheet couldn't be rendered as an image."));
+    img.src = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(sizeSVG(svg,w));
+  });
+}
+function b64bytes(dataUrl){
+  const bin = atob(dataUrl.split(",")[1]);
+  const u = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  return u;
+}
+function pdfFromJpegs(pages){
+  const enc = new TextEncoder(); const chunks=[]; let len=0; const off=[];
+  const put = d => { const b = typeof d==="string"?enc.encode(d):d; chunks.push(b); len+=b.length; };
+  const obj = n => { off[n]=len; put(n+" 0 obj\n"); };
+  const W=612,H=792,M=40;
+  const nObj = 2 + pages.length*3;
+  put("%PDF-1.4\n");
+  obj(1); put("<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  obj(2); put(`<< /Type /Pages /Kids [${pages.map((_,i)=>`${3+i*3} 0 R`).join(" ")}] /Count ${pages.length} >>\nendobj\n`);
+  pages.forEach((p,i)=>{
+    const pg=3+i*3, ct=pg+1, im=pg+2;
+    const dw = W-2*M, dh = dw*(p.h/p.w), y = H-M-dh;
+    obj(pg); put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>\nendobj\n`);
+    const s = `q ${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${M} ${y.toFixed(2)} cm /Im0 Do Q\n`;
+    obj(ct); put(`<< /Length ${s.length} >>\nstream\n${s}endstream\nendobj\n`);
+    obj(im); put(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.bytes.length} >>\nstream\n`);
+    put(p.bytes); put("\nendstream\nendobj\n");
+  });
+  const xref = len;
+  let x = `xref\n0 ${nObj+1}\n0000000000 65535 f \n`;
+  for(let n=1;n<=nObj;n++) x += String(off[n]).padStart(10,"0")+" 00000 n \n";
+  put(x);
+  put(`trailer\n<< /Size ${nObj+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  const out = new Uint8Array(len); let o=0;
+  for(const c of chunks){ out.set(c,o); o+=c.length; }
+  return new Blob([out],{type:"application/pdf"});
+}
+async function savePDF(){
+  if(!CHART) return;
+  const btn = document.getElementById("pdfBtn");
+  btn.disabled = true;
+  try{
+    setStatus('<span class="spin">◴</span> Engraving with Verovio…');
+    const opts = {showWas:document.getElementById("showWas").checked,
+                  footnotes:document.getElementById("showFoot").checked};
+    const v = await verovioPages(CHART,opts);
+    let svgs, engraver = "Verovio";
+    if(v){
+      svgs = v.pages.slice();
+      if(opts.footnotes && v.marks.length) svgs.push(notesPageSVG(v.marks,CHART.title));
+    }else{
+      engraver = "the built-in engraver";
+      setStatus('<span class="spin">◴</span> Verovio is unavailable — using the built-in engraver…');
+      svgs = scorePages(CHART,opts);
+    }
+    const imgs = [];
+    for(const s of svgs){
+      const r = await svgToJpeg(s,1600);
+      imgs.push({bytes:b64bytes(r.url), w:r.w, h:r.h});
+    }
+    const blob = pdfFromJpegs(imgs);
+    downloadBlob(blob,(slugTitle()||"lead-sheet")+"-reharm.pdf");
+    setStatus(`Saved ${svgs.length} page${svgs.length>1?"s":""} as a PDF, engraved by ${engraver}.`);
+  }catch(err){
+    setStatus(err.message,true);
+  }finally{ btn.disabled = false; }
+}
+function slugTitle(){ return CHART ? CHART.title.replace(/[^\w]+/g,"-").replace(/^-|-$/g,"").toLowerCase() : ""; }
+function downloadBlob(blob,name){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* ---------- 7. audio ---------- */
+let AC=null, playing=false, stopFlag=false;
+function voiceLead(chordSym, prevTop){
+  const ch = parseChord(chordSym); if(!ch) return null;
+  const tones = (TONES[ch.q]||TONES.maj);
+  let best=null;
+  for(let inv=0; inv<tones.length; inv++){
+    const notes = tones.map((t,k)=>{
+      let m = 60 + mod(ch.rootPc+t,12);
+      if(k<inv) m += 12;
+      return m;
+    }).sort((a,b)=>a-b);
+    const top = notes[notes.length-1];
+    const cost = prevTop==null?0:Math.abs(top-prevTop);
+    if(!best || cost<best.cost) best={notes,cost,top};
+  }
+  const bass = 36 + mod((ch.bass!=null?ch.bass:ch.rootPc),12);
+  return {bass, notes:best.notes, top:best.top};
+}
+function tone(t,midi,dur,gainV,type){
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=type||"triangle"; o.frequency.value=freqOf(midi);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(gainV,t+.012);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+dur+.05);
+}
+async function play(){
+  if(playing){ stopFlag=true; return; }
+  AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+  await AC.resume();
+  playing=true; stopFlag=false;
+  document.getElementById("playBtn").textContent="Stop";
+  const bpm = Math.max(40,Math.min(260,parseInt(document.getElementById("tempo").value,10)||120));
+  const spb = 60/bpm, beats = CHART.beats, feel = document.getElementById("comp").value;
+  const withMel = document.getElementById("withMel").checked;
+  let t = AC.currentTime + .15, prevTop=null;
+
+  for(let i=0;i<CHART.bars.length;i++){
+    if(stopFlag) break;
+    const bar = CHART.bars[i], sp = spans(bar,beats);
+    const barStart = t;
+    document.querySelectorAll(".bar").forEach(el=>el.classList.remove("playing"));
+    const el = document.querySelector(`.bar[data-i="${i}"]`);
+    if(el){ el.classList.add("playing"); el.scrollIntoView({block:"nearest",behavior:"smooth"}); }
+    for(const s of sp){
+      const v = voiceLead(s.chord.sym, prevTop); if(!v) continue;
+      prevTop = v.top;
+      const start = barStart + (s.from-1)*spb, len = (s.to-s.from)*spb;
+      tone(start, v.bass, Math.min(len,spb*1.6), .16, "sine");
+      if(feel==="block"){ v.notes.forEach(n=>tone(start,n,len*.9,.075)); }
+      else if(feel==="arp"){ v.notes.forEach((n,k)=>tone(start+k*spb*.25,n,spb*.9,.07)); }
+      else if(feel==="charleston"){ v.notes.forEach(n=>{tone(start,n,spb*.7,.075); tone(start+spb*1.5,n,spb*.6,.06);}); }
+      else { v.notes.forEach(n=>{tone(start,n,spb*.55,.07); tone(start+spb*.66,n,spb*.5,.05); if(len>spb*2) tone(start+spb*2,n,spb*.5,.055);}); }
+    }
+    if(withMel) for(const n of bar.melody){
+      const m = midiOf(n.note); if(m==null) continue;
+      tone(barStart+(n.start-1)*spb, m+12, n.beats*spb*.92, .13, "triangle");
+    }
+    t = barStart + beats*spb;
+    const waitMs = (t - AC.currentTime - .1)*1000;
+    if(waitMs>0) await new Promise(r=>setTimeout(r,waitMs));
+  }
+  document.querySelectorAll(".bar").forEach(el=>el.classList.remove("playing"));
+  playing=false; stopFlag=false;
+  document.getElementById("playBtn").textContent="Play";
+}
+
+/* ---------- 8. wiring ---------- */
+window.addEventListener("error",e=>{
+  setStatus("The app hit an error: "+e.message+" (line "+e.lineno+"). Nothing was lost — the chart is still loaded.",true);
+});
+function setStatus(msg,err){
+  const el=document.getElementById("status");
+  el.innerHTML=msg; el.className="status"+(err?" err":"");
+}
+function loadChart(ch,label){
+  if(!ch){
+    setStatus("No bars could be read from that.",true);
+    document.getElementById("sheetTitle").textContent = "Nothing to show";
+    document.getElementById("sheetMeta").textContent =
+      "None of those lines looked like a bar. A bar is a chord symbol, optionally followed by | and the melody: Cmaj7 | E G. Pipes alone also work: | C | F | G7 | C |";
+    document.getElementById("bars").innerHTML = "";
+    return;
+  }
+  CHART = ch; HISTORY=[]; PASS=0;
+  document.getElementById("passNo").textContent="0";
+  document.getElementById("changeCount").textContent="0";
+  document.getElementById("keySel").value = String(ch.keyPc);
+  document.getElementById("modeSel").value = ch.mode;
+  document.getElementById("srcBadge").textContent = label;
+  render();
+}
+(function initKeys(){
+  const sel=document.getElementById("keySel");
+  sel.innerHTML = FLAT.map((n,i)=>`<option value="${i}">${n}${SHARP[i]!==n?" / "+SHARP[i]:""}</option>`).join("");
+})();
+document.getElementById("keySel").addEventListener("change",e=>{
+  if(!CHART) return; CHART.keyPc=parseInt(e.target.value,10); render();
+});
+document.getElementById("modeSel").addEventListener("change",e=>{
+  if(!CHART) return; CHART.mode=e.target.value; render();
+});
+document.getElementById("pdf").addEventListener("change",e=>{
+  document.getElementById("readBtn").disabled = !e.target.files.length;
+  setStatus(e.target.files.length?"Ready to read "+e.target.files[0].name:"");
+});
+document.getElementById("readBtn").addEventListener("click",async ()=>{
+  const f = document.getElementById("pdf").files[0]; if(!f) return;
+  const btn=document.getElementById("readBtn"); btn.disabled=true;
+  try{
+    if(/\.(musicxml|xml|mxl)$/i.test(f.name)){
+      setStatus('<span class="spin">◴</span> Reading MusicXML…');
+      const text = /\.mxl$/i.test(f.name) ? await readMXL(f) : await f.text();
+      const ch = musicXMLToChart(text);
+      if(!ch) throw new Error("That file didn't contain a readable score.");
+      loadChart(ch,f.name);
+      setStatus(`Loaded ${CHART.bars.length} bars from MusicXML — exact, no transcription involved.`);
+    } else {
+      setStatus('<span class="spin">◴</span> Reading the chart…');
+      const text = await extractFromFile(f, m=>setStatus('<span class="spin">◴</span> '+m));
+      document.getElementById("manual").value = text;
+      loadChart(parseChartText(text), f.name);
+      setStatus("Read "+(CHART?CHART.bars.length:0)+" bars. Check them against the page before you trust them.");
+    }
+  }catch(err){
+    setStatus(err.message+" You can still type the chart in below.",true);
+  }finally{ btn.disabled=false; }
+});
+document.getElementById("parseBtn").addEventListener("click",()=>{
+  loadChart(parseChartText(document.getElementById("manual").value),"typed in");
+  if(CHART){
+    const bare = CHART.bars.filter(b=>!b.melody.length).length;
+    setStatus("Loaded "+CHART.bars.length+" bars."+(bare?` ${bare} have no melody, so nothing is checking those substitutions against the tune.`:""));
+  }
+});
+document.getElementById("exampleBtn").addEventListener("click",()=>{
+  document.getElementById("manual").value = EXAMPLE;
+  loadChart(parseChartText(EXAMPLE),"example");
+  setStatus("Example loaded — 16 bars of Aura Lee.");
+});
+document.getElementById("r_all").addEventListener("change",e=>{
+  Object.keys(RULES).forEach(k=>{
+    const el=document.getElementById("r_"+k);
+    el.disabled = e.target.checked;
+    el.parentElement.style.opacity = e.target.checked?.55:1;
+  });
+});
+document.querySelectorAll("#aggro button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#aggro button").forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");
+}));
+document.getElementById("reharmBtn").addEventListener("click",()=>{
+  reharmonize();
+  document.getElementById("reharmBtn").textContent = "Reharmonize again";
+});
+document.getElementById("undoBtn").addEventListener("click",()=>{
+  if(!HISTORY.length) return;
+  CHART.bars = HISTORY.pop(); PASS=Math.max(0,PASS-1);
+  document.getElementById("passNo").textContent=PASS;
+  render(); setStatus("Rolled back one pass.");
+});
+document.getElementById("revertBtn").addEventListener("click",()=>{
+  if(!HISTORY.length) return;
+  CHART.bars = HISTORY[0]; HISTORY=[]; PASS=0;
+  document.getElementById("passNo").textContent="0";
+  document.getElementById("changeCount").textContent="0";
+  render(); setStatus("Back to the chart as written.");
+});
+document.getElementById("bars").addEventListener("click",e=>{
+  const lock = e.target.closest("[data-lock]");
+  if(lock){ e.stopPropagation(); const i=+lock.dataset.lock; CHART.bars[i].lock=!CHART.bars[i].lock; render(); return; }
+  const bar = e.target.closest(".bar"); if(!bar) return;
+  const i = +bar.dataset.i;
+  renderWhy(renderWhy._open===i?null:i);
+  renderWhy._open = renderWhy._open===i?null:i;
+});
+document.getElementById("playBtn").addEventListener("click",play);
+document.querySelectorAll("#viewtog button").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+["showWas","showFoot"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{
+  if(VIEW==="score") buildScore(document.getElementById("score"));
+}));
+document.getElementById("pdfBtn").addEventListener("click",savePDF);
+document.querySelectorAll("#staffsize button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#staffsize button").forEach(x=>x.setAttribute("aria-pressed","false"));
+  b.setAttribute("aria-pressed","true");
+  if(VIEW==="score") buildScore(document.getElementById("score"));
+}));
+document.getElementById("xmlBtn").addEventListener("click",()=>{
+  if(!CHART) return;
+  downloadBlob(new Blob([chartToMusicXML(CHART)],{type:"application/vnd.recordare.musicxml+xml"}),
+               (slugTitle()||"lead-sheet")+"-reharm.musicxml");
+  setStatus("MusicXML saved — opens in MuseScore, Finale, Sibelius or Dorico.");
+});
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  const L=[`TITLE: ${CHART.title}`,`KEY: ${spell(CHART.keyPc,CHART.flats)} ${CHART.mode}`,`METER: ${CHART.beats}/4`,
+           `Reharmonized in The Dewey Book — ${PASS} pass${PASS===1?"":"es"}`,""];
+  CHART.bars.forEach((b,i)=>{
+    L.push(`${String(i+1).padStart(3," ")}. ${b.chords.map(c=>c.sym+(b.chords.length>1?"@"+c.beat:"")).join(" ").padEnd(22," ")}| ${b.melody.map(n=>n.note+"="+n.beats).join(" ")}`);
+  });
+  const notes = CHART.bars.map((b,i)=>b.note?`Bar ${i+1}: ${b.note.from} → ${b.note.to}. ${RULES[b.note.rule]}. ${b.note.why} ${b.note.melody}`:null).filter(Boolean);
+  if(notes.length) L.push("", "NOTES", ...notes);
+  const blob = new Blob([L.join("\n")],{type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (CHART.title.replace(/[^\w]+/g,"-").toLowerCase()||"chart")+"-reharm.txt";
+  a.click(); URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
