@@ -230,6 +230,18 @@ textarea{min-height:130px;resize:vertical;line-height:1.5}
         </div>
         <div class="status" id="status"></div>
 
+        <details style="margin-top:.6rem">
+          <summary style="cursor:pointer;font-size:.74rem;color:var(--ink-soft)">Reader key (needed for PDF and photo reading)</summary>
+          <div style="margin-top:.4rem">
+            <input type="password" id="apikey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+            <div class="btn-row">
+              <button class="btn" id="keySave">Save key</button>
+              <button class="btn" id="keyClear">Clear</button>
+            </div>
+            <p style="font-size:.7rem;color:var(--ink-soft);margin:.35rem 0 0;line-height:1.4">Stored in this browser only, never sent anywhere but Anthropic. MusicXML and typed charts need no key.</p>
+          </div>
+        </details>
+
         <div class="field" style="margin-top:.9rem">
           <label for="manual">Or type it in — one bar per line: <code>Cmaj7 | E G</code></label>
           <textarea id="manual" spellcheck="false" placeholder="KEY: C major&#10;METER: 4/4&#10;Cmaj7 | E G&#10;A-7 | C B A&#10;D-7 G7 | F E&#10;Cmaj7 | C"></textarea>
@@ -795,15 +807,41 @@ METER: 4/4
 Fmaj7 | A4=2 C5=2
 D-7 G7@3 | Bb4=2 A4=2
 
+Write the music out linearly: expand repeat signs, D.S., D.C., and first/second endings into consecutive measures so the chart plays straight through. Slash chords keep their bass note (F/A). If a measure has chord symbols but no melody, give it a full-measure rest, e.g. r=4 in 4/4. Sus chords stay sus (Fsus).
+
 After the last measure you transcribe in this response, output END on its own line if the piece is finished, or MORE if there are further measures.`;
 
+let MEM_KEY = "";
+function getKey(){
+  if(MEM_KEY) return MEM_KEY;
+  try{ return localStorage.getItem("dewey_api_key")||""; }catch(e){ return ""; }
+}
+function setKey(k){
+  MEM_KEY = k;
+  try{ k ? localStorage.setItem("dewey_api_key",k) : localStorage.removeItem("dewey_api_key"); }catch(e){}
+}
 async function callClaude(content){
-  const res = await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user",content}] })
-  });
-  if(!res.ok) throw new Error("The reader service returned "+res.status+".");
+  const key = getKey();
+  const headers = {"Content-Type":"application/json"};
+  if(key){
+    headers["x-api-key"] = key;
+    headers["anthropic-version"] = "2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"] = "true";
+  }
+  let res;
+  try{
+    res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST", headers,
+      body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:1000, messages:[{role:"user",content}] })
+    });
+  }catch(e){
+    throw new Error(key
+      ? "Couldn't reach the API — check the connection and try again."
+      : "No reader key is set, so this copy can't transcribe a PDF. Open “Reader key” below and paste one, or load a MusicXML file instead.");
+  }
+  if(res.status===401 || res.status===403) throw new Error("The reader key was rejected. Check it under “Reader key”.");
+  if(res.status===429) throw new Error("Rate limited by the API. Wait a moment and try again.");
+  if(!res.ok) throw new Error("The reader returned "+res.status+".");
   const data = await res.json();
   return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
 }
@@ -1614,6 +1652,20 @@ document.getElementById("readBtn").addEventListener("click",async ()=>{
     setStatus(err.message+" You can still type the chart in below.",true);
   }finally{ btn.disabled=false; }
 });
+document.getElementById("keySave").addEventListener("click",()=>{
+  const v = document.getElementById("apikey").value.trim();
+  if(!v){ setStatus("Paste a key first.",true); return; }
+  setKey(v);
+  setStatus("Key saved in this browser. PDF and photo reading is on.");
+});
+document.getElementById("keyClear").addEventListener("click",()=>{
+  setKey(""); document.getElementById("apikey").value="";
+  setStatus("Key cleared.");
+});
+(function initKey(){
+  const k = getKey();
+  if(k) document.getElementById("apikey").value = k;
+})();
 document.getElementById("parseBtn").addEventListener("click",()=>{
   loadChart(parseChartText(document.getElementById("manual").value),"typed in");
   if(CHART){
